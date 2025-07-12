@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 64370809263536868}
   m_Layer: 0
   m_Name: WoodenWall_Corner
-  m_TagString: Untagged
+  m_TagString: WoodFloor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 64973826356002098}
   m_Layer: 0
   m_Name: WoodenWall_1
-  m_TagString: Untagged
+  m_TagString: WoodFloor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295

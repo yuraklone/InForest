@@ -35,7 +35,7 @@ public class FootstepPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        isGround = Physics.Raycast(rayCastCore.transform.position,Vector3.down, out hitInfo, 5f, ~(1 << 6));
+        isGround = Physics.Raycast(rayCastCore.transform.position,Vector3.down, out hitInfo, 2f, ~(1 << 6));
 
 
     }
@@ -113,7 +113,15 @@ public class FootstepPlayer : MonoBehaviour
                                 
                                 break;
                             }
-        break;
+                break;
+
+            case "WoodFloor":
+                criAtomSource.cueName = "deerfoot_wood";
+                break;
+            case "Rock":
+                criAtomSource.cueName = "deerfoot_rock";
+                break;
+
 
 
         }

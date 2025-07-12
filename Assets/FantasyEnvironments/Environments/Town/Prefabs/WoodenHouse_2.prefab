@@ -283,7 +283,7 @@ GameObject:
   - component: {fileID: 205790970493575674}
   m_Layer: 0
   m_Name: WoodenHouse_2
-  m_TagString: Untagged
+  m_TagString: WoodFloor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -458,7 +458,7 @@ GameObject:
   - component: {fileID: 64867856888994652}
   m_Layer: 0
   m_Name: UCX_WoodenHouse_2_LOD0
-  m_TagString: Untagged
+  m_TagString: WoodFloor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
