@@ -16,6 +16,10 @@ public class AtomSourceManipulator : MonoBehaviour
     // CriAtomSource が内部で動く Collider のリスト
     public List<Collider> colliders;
 
+    public float followSpeed = 0.3f;
+
+    Vector3 minVector;
+
 
     // Start is called before the first frame update
     void Start()
@@ -33,7 +37,7 @@ public class AtomSourceManipulator : MonoBehaviour
 
         // 設定された Collider から CriAtomListener との最近傍点を計算。
         float minMagnitude = float.MaxValue;
-        Vector3 minVector = Vector3.zero;
+        minVector = Vector3.zero;
         var listenerPosition = listener.transform.position;
 
         for (int i = 0; i < colliders.Count; i++)
@@ -49,8 +53,16 @@ public class AtomSourceManipulator : MonoBehaviour
         }
 
         // 最近傍点に CriAtomSource を移動。
-        atomSource.transform.position = minVector;
+        //atomSource.transform.position = minVector;
+        
 
 
     }
+    void LateUpdate()
+    {
+        atomSource.transform.position = Vector3.Lerp(transform.position, minVector+new Vector3(0,1,0), followSpeed * Time.deltaTime);
+        atomSource.transform.rotation = Quaternion.Lerp(transform.rotation, listener.transform.rotation, followSpeed * Time.deltaTime);
+
+    }
+
 }
