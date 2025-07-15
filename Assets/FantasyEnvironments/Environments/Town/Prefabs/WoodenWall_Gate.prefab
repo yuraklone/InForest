@@ -230,7 +230,7 @@ MonoBehaviour:
     - 0
     - 0
   _cueName: 
-  _cueSheet: SE
+  _cueSheet: ObjectSE
 --- !u!114 &88204800462714663
 MonoBehaviour:
   m_ObjectHideFlags: 0
