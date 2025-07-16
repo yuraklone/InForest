@@ -36,7 +36,7 @@ public class PlayerController3 : MonoBehaviour
 
 
 
-        // WASD入力から、XZ平面(水平な地面)を移動する方向(velocity)を得ます
+        // WASD入力から、XZ平面(水平な地面)を移動する方向(velocity)を得る
         velocity = Vector3.zero;
         if (Input.GetKey(KeyCode.W))
             velocity.z += 1;
@@ -47,7 +47,7 @@ public class PlayerController3 : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
             velocity.x += 1;
 
-        // 速度ベクトルの長さを1秒でmoveSpeedだけ進むように調整します
+        // 速度ベクトルの長さを1秒でmoveSpeedだけ進むように調整する
         velocity = velocity.normalized * moveSpeed * Time.deltaTime;
 
         // いずれかの方向に移動している場合
@@ -57,13 +57,16 @@ public class PlayerController3 : MonoBehaviour
 
             // プレイヤーの回転(transform.rotation)の更新
             // 無回転状態のプレイヤーのZ+方向(後頭部)を、
-            // カメラの水平回転(refCamera.hRotation)で回した移動の反対方向(-velocity)に回す回転に段々近づけます
-            transform.rotation = Quaternion.Slerp(transform.rotation,
-                                                  Quaternion.LookRotation(refCamera.hRotation * velocity),
-                                                  applySpeed);
+            // カメラの水平回転(refCamera.hRotation)で回した移動の反対方向(-velocity)に回す回転に段々近づける
+            transform.rotation = Quaternion.Slerp
+                (
+                    transform.rotation,
+                    Quaternion.LookRotation(refCamera.hRotation * velocity),
+                    applySpeed
+                );
 
             // プレイヤーの位置(transform.position)の更新
-            // カメラの水平回転(refCamera.hRotation)で回した移動方向(velocity)を足し込みます
+            // カメラの水平回転(refCamera.hRotation)で回した移動方向(velocity)を足し込む
             transform.position += refCamera.hRotation * velocity;
         }
         else
