@@ -34,7 +34,7 @@ public class CameraController2 : MonoBehaviour
     void LateUpdate()
     {
         // 水平回転の更新
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && PlayerController3.gameState == "playing")
         {
             angleX += Input.GetAxis("Mouse X") * turnSpeed;
             angleY -= Input.GetAxis("Mouse Y") * turnSpeed;

@@ -49,6 +49,7 @@ public class AtomSourceManipulator : MonoBehaviour
             {
                 minMagnitude = dist;
                 minVector = closestPoint;
+                minVector.y = 0;
             }
         }
 

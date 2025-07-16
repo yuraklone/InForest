@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerController3 : MonoBehaviour
 {
-    
+    public static string gameState;
 
     [SerializeField] private Vector3 velocity;              // 移動方向
     [SerializeField] private float moveSpeed = 5.0f;        // 移動速度
@@ -24,6 +24,7 @@ public class PlayerController3 : MonoBehaviour
     {
         rbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
+        gameState = "playing";
     }
     void Update()
     {

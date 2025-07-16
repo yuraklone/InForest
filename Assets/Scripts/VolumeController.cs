@@ -52,12 +52,13 @@ public class VolumeController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(isVolSetting == false)
+        if (isVolSetting == false && PlayerController3.gameState == "playing")
         {
             if (Input.GetKeyDown(KeyCode.T))
             {
                 configPanel.SetActive(false);
                 isVolSetting = true;
+                PlayerController3.gameState = "pause";
                 masterVolSlider.value = masterVolume;
                 bgmVolSlider.value = CriAtom.GetCategoryVolume(bgmCatName);
                 envVolSlider.value = CriAtom.GetCategoryVolume(envCatName);
@@ -66,12 +67,15 @@ public class VolumeController : MonoBehaviour
 
             }
         }
+        else if (isVolSetting == false && PlayerController3.gameState == "pause") return;
+
         else
         {
             if (Input.GetKeyDown(KeyCode.T))
             {
                 volumePanel.SetActive(false);
                 isVolSetting = false;
+                PlayerController3.gameState = "playing";
                 configPanel.SetActive(true);
             }
         }
