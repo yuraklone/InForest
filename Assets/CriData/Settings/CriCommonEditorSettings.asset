@@ -12,4 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79ebb77983eb58c47bef7c0a52eb96b6, type: 3}
   m_Name: CriCommonEditorSettings
   m_EditorClassIdentifier: 
+  tryFsSceneSettings: 0
   enableStaticFieldReload: 1
+  fsConfig:
+    numberOfLoaders: 16
+    numberOfBinders: 8
+    numberOfInstallers: 2
+    installBufferSize: 32
+    maxPath: 256
+    userAgentString: 
+    minimizeFileDescriptorUsage: 0
+    enableCrcCheck: 0
+    androidDeviceReadBitrate: 50000000

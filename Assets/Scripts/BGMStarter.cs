@@ -7,13 +7,14 @@ public class BGMStarter : MonoBehaviour
     GameObject bgm;
     BGMController bgmController;
     public string thisScene;
+    public float startDelay = 1.0f;
     // Start is called before the first frame update
     void Start()
     {
         bgm = GameObject.FindGameObjectWithTag("BGM");
         bgmController = bgm.GetComponent<BGMController>();
 
-        Invoke("BGMStart", 1.0f);
+        Invoke("BGMStart", startDelay);
 
 
     }
