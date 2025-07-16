@@ -621,7 +621,12 @@ public sealed class CriAtomWindow : EditorWindow
 				go = Selection.gameObjects[0];
 			}
 			var acbInfo = acbInfoList[this.selectedCueSheetId];
-			CriAtom atom = GameObject.FindObjectOfType(typeof(CriAtom)) as CriAtom;
+			CriAtom atom = null;
+#if UNITY_2023_1_OR_NEWER
+			atom = GameObject.FindAnyObjectByType<CriAtom>();
+#else
+			atom = GameObject.FindObjectOfType<CriAtom>();
+#endif
 			if (atom == null) {
 				var criObject = GameObject.Find("/CRIWARE");
 				if (criObject == null) {

@@ -11,7 +11,7 @@ namespace CriWare {
 public partial class CriProfiler
 {
 	/* CRI Atom Preview connection ver. */
-	public const int CRI_ATOM_PREVIEW_CONNECTION_VERSION = 0x00800000;
+	public const int CRI_ATOM_PREVIEW_CONNECTION_VERSION = 0x01000000;
 
 	/* the size of the parameter "packet size" in bytes */
 	private const int DATA_LENGTH_PARAM_SIZE = 4;
@@ -20,7 +20,7 @@ public partial class CriProfiler
 		CRITCP_MAIL_OPEN = 1,
 		CRITCP_MAIL_OPEN_RESULT,
 		CRITCP_MAIL_RECV,
-		CRITCP_MAIL_CHANGE,
+		CRITCP_MAIL_EXIT_TO_PROFILER,	// プロファイラーへの切断通知
 		CRITCP_MAIL_EXIT,
 		CRITCP_MAIL_SEND_CUESHEET_BINARY,
 		CRITCP_MAIL_SEND_CUESHEET_BINARY_RESULT,
@@ -32,12 +32,12 @@ public partial class CriProfiler
 		CRITCP_MAIL_STOP_MONITOR_RESULT,
 		CRITCP_MAIL_MONITOR_AUOBJ_STATUS,
 		CRITCP_MAIL_MONITOR_AUOBJ_STATUS_RESULT,
-		CRITCP_MAIL_SEND_LOG_REQUEST,
-		CRITCP_MAIL_SEND_LOG_REQUEST_RESULT,
-		CRITCP_MAIL_START_LOG_PLAYBACK,
-		CRITCP_MAIL_START_LOG_PLAYBACK_RESULT,
-		CRITCP_MAIL_STOP_LOG_PLAYBACK,                                  /* 20 */
-		CRITCP_MAIL_STOP_LOG_PLAYBACK_RESULT,
+		CRITCP_MAIL_SEND_LOG_REQUEST__DELETED,
+		CRITCP_MAIL_SEND_LOG_REQUEST_RESULT__DELETED,
+		CRITCP_MAIL_START_LOG_PLAYBACK__DELETED,
+		CRITCP_MAIL_START_LOG_PLAYBACK_RESULT__DELETED,
+		CRITCP_MAIL_STOP_LOG_PLAYBACK__DELETED,
+		CRITCP_MAIL_STOP_LOG_PLAYBACK_RESULT__DELETED,
 		CRITCP_MAIL_START_LOG_RECORD,
 		CRITCP_MAIL_START_LOG_RECORD_RESULT,
 		CRITCP_MAIL_STOP_LOG_RECORD,
@@ -48,15 +48,15 @@ public partial class CriProfiler
 		CRITCP_MAIL_NON,
 		CRITCP_MAIL_NUM_AUOBJ,                                          /* 30 */
 		CRITCP_MAIL_SEND_LOG,
-		CRITCP_MAIL_SEND_LOG_RESULT,
+		CRITCP_MAIL_ERROR,
 		CRITCP_MAIL_PREVIEW_FLAG,
 		CRITCP_MAIL_PREVIEW_FLAG_RESULT,
 		CRITCP_MAIL_SEND_FILE_INFORMATION,
 		CRITCP_MAIL_SEND_FILE_INFORMATION_RESULT,
 		CRITCP_MAIL_SEND_FILE_DATA,
 		CRITCP_MAIL_SEND_FILE_DATA_RESULT,
-		CRITCP_MAIL_SEND_LOG_FOR_PLAYBACK,
-		CRITCP_MAIL_SEND_LOG_FOR_PLAYBACK_RESULT,                       /* 40 */
+		CRITCP_MAIL_SEND_LOG_FOR_PLAYBACK__DELETED,
+		CRITCP_MAIL_SEND_LOG_FOR_PLAYBACK_RESULT__DELETED,
 		CRITCP_MAIL_PREVIEW_SEND_DETA_RESULT,
 		CRITCP_MAIL_PREVIEW_SEND_DETA_RESULT_RESULT,
 		CRITCP_MAIL_PREVIEW_CPU_LOAD,
@@ -111,7 +111,7 @@ public partial class CriProfiler
 		CRITCP_MAIL_OVERWRITE_ACF_DATA_RESULT,
 		CRITCP_MAIL_MONITOR_ATOMEXASR_BUS_INFO,
 		CRITCP_MAIL_MONITOR_ATOMEXASR_BUS_INFO_RESULT,
-		CRITCP_MAIL_MONITOR_ATOMEX_ERR_INFO,
+		CRITCP_MAIL_MONITOR_ACF_LINKAGE_RACK_INFO,
 		CRITCP_MAIL_MONITOR_ATOMEX_ERR_INFO_RESULT,
 		CRITCP_MAIL_MONITOR_ATOMEXASR_DSP_SPECTRA,
 		CRITCP_MAIL_MONITOR_ATOMEXASR_DSP_SPECTRA_RESULT,
@@ -128,9 +128,10 @@ public partial class CriProfiler
 		CRITCP_MAIL_MONITOR_STREAM_AWB_INFO,
 		CRITCP_MAIL_MONITOR_STREAM_AWB_INFO_RESULT,                     /* 110 */
 		CRITCP_MAIL_CONNECTION_VERSION,
-		CRITCP_MAIL_CONNECTION_VERSION_RESULT,
+		CRITCP_MAIL_CONNECTION_VERSION_TO_PROFILER,
 		CRITCP_MAIL_MONITOR_ATOM_EXPLAYBACKINFO_PLAY_POSITION_WITH_PLAY_STATUS,
 		CRITCP_MAIL_MONITOR_REJECT_OVERWRITE_ACB,
+		CRITCP_MAIL_MONITOR_ATOMEXASR_LOUDNESS_INFO,
 	};
 
 	/* ログ用API識別番号 */
@@ -270,7 +271,7 @@ public partial class CriProfiler
 		LOG_COMMAND_SoundVoice_Allocate,                    /* criAtomSoundVoice_AllocateVoice */
 		LOG_COMMAND_GetAisacDestinationValue,               /* criAtomCueSheet_GetAisacDestinationValue */
 		LOG_COMMAND_SequenceTrack_Mute,                     /* criAtomSequenceTrack_Mute */
-		LOG_COMMAND_Preview_RequestSendLog,                 /* CriAtomMonitorLoc::MakeLogSendRequestPacket */
+		LOG_COMMAND_Preview_RequestSendLog_DELETED,         /* CriAtomMonitorLoc::MakeLogSendRequestPacket */
 		LOG_COMMAND_RequestSendAcb,                         /* CriAtomMonitorLoc::MakeRequestPacket4SendAcb */
 		LOG_COMMAND_Monitor_MakeClosePacket,                /* CriAtomMonitorLoc::MakeClosePacket */
 		LOG_COMMAND_Monitor_MakeSendDataResultPacket,       /* CriAtomMonitorLoc::MakeSendDataResultPacket */
@@ -336,8 +337,8 @@ public partial class CriProfiler
 		LOG_COMMAND_ExPlayer_Set3dSourceHn,					/* criAtomExPlayer_Set3dSourceHn */
 		LOG_COMMAND_ExPlayer_Set3dListenerHn,				/* criAtomExPlayer_Set3dListenerHn */
 		LOG_COMMAND_ExPlayer_UpdateAll,						/* criAtomExPlayer_UpdateAll */
-		LOG_COMMAND_ExCategory_Mute,						/* criAtomExCategory_MuteByName */
-		LOG_COMMAND_ExCategory_Solo,						/* criAtomExCategory_SoloByName */
+		LOG_COMMAND_ExCategory_MuteByName,					/* criAtomExCategory_MuteByName */
+		LOG_COMMAND_ExCategory_SoloByName,					/* criAtomExCategory_SoloByName */
 		LOG_COMMAND_ExPlayer_SetParameterFloat32,			/* criAtomExPlayer_SetParameterFloat32 */
 		LOG_COMMAND_ExPlayer_SetParameterSint32,			/* criAtomExPlayer_SetParameterSint32 */
 		LOG_COMMAND_ExPlayer_SetParameterUint32,            /* criAtomExPlayer_SetParameterUint32 */
@@ -633,6 +634,55 @@ public partial class CriProfiler
 		LOG_COMMAND_Ex3dListener_Set3dRegionHn,             /* criAtomEx3dListener_Set3dRegionHn */
 		LOG_COMMAND_ExPlayer_StartAsync,                    /* criAtomExPlayer_StartAsync */
 		LOG_COMMAND_ExPlayer_SetNextBlockIndex,             /* criAtomExPlayback_SetNextBlockIndex */
+		LOG_COMMAND_ExCategory_SetReactParameter,			/* criAtomExCategory_SetReactParameter */
+		LOG_COMMAND_ExVoicePool_AllocateInstrumentVoicePool,/* criAtomExVoicePool_AllocateInstrumentVoicePool */
+		LOG_COMMAND_ExVoicePool_InstrumentVoicePoolConfig,  /* criAtomExVoicePool_AllocateInstrumentVoicePool */
+		LOG_COMMAND_ExAcb_ReleaseAsync,						/* criAtomExAcb_ReleaseAsync */
+		LOG_COMMAND_ExPlayer_UpdateAllAsync,				/* criAtomExPlayer_UpdateAllAsync */
+		LOG_COMMAND_ExPlayback_EnumerateAtomPlayers,		/* criAtomExPlayback_EnumerateAtomPlayers */
+		LOG_COMMAND_ExPlayback_EnumerateVoiceInfos,			/* criAtomExPlayback_EnumerateVoiceInfos */
+		LOG_COMMAND_Ex3dSource_SetAttenuationDistanceSetting, /* criAtomEx3dSource_SetAttenuationDistanceSetting */
+		LOG_COMMAND_Ex_AddResource,							/* criAtomEx_AddResource */
+		LOG_COMMAND_Ex_RemoveResource,						/* criAtomEx_RemoveResource */
+		LOG_COMMAND_ExPlayer_SetResourceType,				/* criAtomExPlayer_SetResourceType */
+		LOG_COMMAND_ExPlayer_SetBusSendLevel,				/* criAtomExPlayer_SetBusSendLevel */
+		LOG_COMMAND_Ex3dListener_SetDistanceFactor,			/* criAtomEx3dListener_SetDistanceFactor */
+		LOG_COMMAND_ExPlayer_SetBusSendLevelOffset,			/* cruAtomExPlayer_SetBuSendLevelOffset */
+		LOG_COMMAND_Ex3dSource_SetConeOrientation,			/* criAtomEx3dSource_SetConeOrientation */
+		LOG_COMMAND_ExAsr_SetConfigForWorkSizeCalculation,	/* criAtomExAsr_SetConfigForWorkSizeCalculation */
+		LOG_COMMAND_ExAsrRack_AttachLevelMeter,				/* criAtomExAsr_AttachLevelMater */
+		LOG_COMMAND_ExAsrRack_DetachLevelMeter,				/* criAtomExAsr_DetachLevelMeter */
+		LOG_COMMAND_ExAsrRack_AttachLoudnessMeter,			/* criAtomExAsr_AttachLoudnessMeter */
+		LOG_COMMAND_ExAsrRack_DetachLoudnessMeter,			/* criAtomExAsr_DetachLoutnessMeter */
+		LOG_COMMAND_ExAsrRack_ResetLoudnessMeter,			/* criAtomExAsr_ResetLoudnessMeter */
+		LOG_COMMAND_ExAsrRack_AttachTruePeakMeter,			/* criAtomExAsr_AttachTruePeakMeter */
+		LOG_COMMAND_ExAsrRack_DetachTruePeakMeter,			/* criAtomExAsr_DetachTruePeakMeter */
+		LOG_COMMAND_Asr_Initialize,							/* criAtomAsr_Initialize */
+		LOG_COMMAND_Asr_Finalize,							/* criAtomAsr_Finalize */
+		LOG_COMMAND_Ex_InitializeForUserPcmOutput,			/* criAtomEx_InitializeForUserPcmOutput */
+		LOG_COMMAND_Ex_FinalizeForUserPcmOut,				/* criAtomEx_FinalizeForUserPcmOutput */
+		LOG_COMMAND_ExAsr_SetDspBypassByName,				/* criAtomExAsr_SetDspBypassByName */
+		LOG_COMMAND_Ex3dSource_Create_Success,
+		LOG_COMMAND_Ex3dListener_Create_Success,
+		LOG_COMMAND_Ex3dRegion_Create_Success,
+		LOG_COMMAND_Ex3dSourceList_Create_Success,
+		LOG_COMMAND_Ex3dTransceiver_Create_Success,
+		LOG_COMMAND_Ex_InitializeWASAPI,
+		LOG_COMMAND_Ex_FinalizeWASAPI,
+		LOG_COMMAND_Ex_InitializeCOMMON,
+		LOG_COMMAND_Ex_FinalizeCOMMON,
+		LOG_COMMAND_Ex_InitializeMACOSX,
+		LOG_COMMAND_Ex_FinalizeMACOSX,
+		LOG_COMMAND_ExPlayer_Create_Success,
+		LOG_COMMAND_ExAcb_LoadAcbFile_Success,
+		LOG_COMMAND_DoActionApplyMixerSnapshot,
+		LOG_COMMAND_ExVoicePool_AllocateMp3VoicePool_PS5,
+		LOG_COMMAND_ExVoicePool_AllocateMp3VoicePool_PS4,
+		LOG_COMMAND_ExPlayer_Start_Success,
+		LOG_COMMAND_Dbas_Create_Success,
+		LOG_COMMAND_ExAsrRack_SetBusMuteByName,
+		LOG_COMMAND_ExPlayer_SetStartTimeMicro,
+		LOG_COMMAND_ExPlayer_StopWithOption,
 	};
 
 	protected enum LogParamId {
@@ -657,7 +707,7 @@ public partial class CriProfiler
 		LOG_STRINGS_ITEM_Context,                       /* context */
 		LOG_STRINGS_ITEM_OutputChannels,                /* output_channels */
 		LOG_STRINGS_ITEM_OutputSamplingRate,            /* output_sampling_rate */
-		LOG_STRINGS_ITEM_SoundRendererType,             /* sound_renderer_type */
+		LOG_STRINGS_ITEM_SoundRendererType_uint8,       /* sound_renderer_type */
 		LOG_STRINGS_ITEM_NumMixers,                     /* num_mixers */
 		LOG_STRINGS_ITEM_MaxVoices,                     /* max_voices */
 		LOG_STRINGS_ITEM_MaxInputChannels,              /* max_input_channels */
@@ -813,7 +863,7 @@ public partial class CriProfiler
 		LOG_STRINGS_ITEM_Ex3dDirectionFocusLevel,       /* 3dDirectionFocusLevel */
 		LOG_STRINGS_ITEM_Result3dPos,                   /* Result3dPos */
 		LOG_STRINGS_ITEM_ExAiffVoicePoolConfig,         /* CriAtomExAiffVoicePoolConfig */
-		LOG_STRINGS_ITEM_SrType,                        /* SoundRendererTyoe */
+		LOG_STRINGS_ITEM_SoundRendererType,             /* SoundRendererType */
 		LOG_STRINGS_ITEM_ExAt9VoicePoolConfig_PS4,      /* CriAtomExAt9VoicePoolConfig_PS4 */
 		LOG_STRINGS_ITEM_AverageServerTime,             /* AverageServerTime */
 		LOG_STRINGS_ITEM_AverageServerInterval,         /* AverageServerInterval */
@@ -891,6 +941,8 @@ public partial class CriProfiler
 		LOG_STRINGS_ITEM_Priority,						/* プライオリティ */
 		LOG_STRINGS_ITEM_Solo,							/* Solo */
 		LOG_STRINGS_ITEM_Param_Id,						/* Parameter ID */
+		LOG_STRINGS_ITEM_Param_Name,                    /* Parameter Name */
+		LOG_STRINGS_ITEM_Param_Index,                   /* Parameter Index */
 		LOG_STRINGS_ITEM_Param_Float32,					/* ExPlayerParameter_SetParameterFloat32 */
 		LOG_STRINGS_ITEM_Param_Sint32,					/* ExPlayerParameter_SetParameterSint32 */
 		LOG_STRINGS_ITEM_Param_Uint32,					/* ExPlayerParameter_SetParameterUint32 */
@@ -1032,6 +1084,88 @@ public partial class CriProfiler
 		LOG_STRINGS_ITEM_DirectAuiodRadius,
 		LOG_STRINGS_ITEM_CrossfadeDistance,
 		LOG_STRINGS_ITEM_PreviewRackType,
+		LOG_STRINGS_ITEM_Flag,
+		LOG_STRINGS_ITEM_ReactName,
+		LOG_STRINGS_ITEM_EnableDecrementAisacModulationKey,
+		LOG_STRINGS_ITEM_DecrementAisacModulationKey,
+		LOG_STRINGS_ITEM_EnableIncrementAisacModulationKey,
+		LOG_STRINGS_ITEM_IncrementAisacModulationKey,
+		LOG_STRINGS_ITEM_DuckerLevel,
+		LOG_STRINGS_ITEM_DuckerTargetType,
+		LOG_STRINGS_ITEM_FadeParameterEntryCurveType,
+		LOG_STRINGS_ITEM_FadeParameterEntryCurveStrength,
+		LOG_STRINGS_ITEM_FadeParameterEntryFadeTimeMs,
+		LOG_STRINGS_ITEM_FadeParameterExitCurveType,
+		LOG_STRINGS_ITEM_FadeParameterExitCurveStrength,
+		LOG_STRINGS_ITEM_FadeParameterExitFadeTimeMs,
+		LOG_STRINGS_ITEM_HoldType,
+		LOG_STRINGS_ITEM_HoldTimeMs,
+		LOG_STRINGS_ITEM_ReactType,
+		LOG_STRINGS_ITEM_EnablePausingCue,
+		LOG_STRINGS_ITEM_InterfaceName,
+		LOG_STRINGS_ITEM_InstrumentName,
+		LOG_STRINGS_ITEM_ExInstrumentVoicePoolConfig,
+		LOG_STRINGS_ITEM_ExAcbReleasedCallback,
+		LOG_STRINGS_ITEM_AtomPlayerCallback,
+		LOG_STRINGS_ITEM_EnableAtomSoundDisabledMode,	
+		LOG_STRINGS_ITEM_EnableAutoMatchingInPanTypeAuto,
+		LOG_STRINGS_ITEM_EnableCategoryOverrideByExPlayer,
+		LOG_STRINGS_ITEM_SequencePrepareRatio,
+		LOG_STRINGS_ITEM_FsThreadModel,
+		LOG_STRINGS_ITEM_NumBinders,
+		LOG_STRINGS_ITEM_NumGroupLoaders,
+		LOG_STRINGS_ITEM_NumStdioHandles,
+		LOG_STRINGS_ITEM_NumInstallers, 
+		LOG_STRINGS_ITEM_MaxBinds,
+		LOG_STRINGS_ITEM_FsVersion,
+		LOG_STRINGS_ITEM_FsVersionString,
+		LOG_STRINGS_ITEM_EnableCrcCheck,
+		LOG_STRINGS_ITEM_ExAcfLocationInfoType,
+		LOG_STRINGS_ITEM_Version,
+		LOG_STRINGS_ITEM_VersionEx,
+		LOG_STRINGS_ITEM_VersionString, 
+		LOG_STRINGS_ITEM_VersionExString,
+		LOG_STRINGS_ITEM_ExResourceType,
+		LOG_STRINGS_ITEM_BusIndex,
+		LOG_STRINGS_ITEM_DistanceFactor,
+		LOG_STRINGS_ITEM_ConeOrientation,
+		LOG_STRINGS_ITEM_IntervalMs,
+		LOG_STRINGS_ITEM_HoldTimeMsSint32,
+		LOG_STRINGS_ITEM_ShortTermTimeMs,
+		LOG_STRINGS_ITEM_IntegratedTimeMs,
+		LOG_STRINGS_ITEM_SampleClipping,
+		LOG_STRINGS_ITEM_Marker_AtomExConfig,
+		LOG_STRINGS_ITEM_Marker_AsrConfig,
+		LOG_STRINGS_ITEM_Marker_HcaMxConfig,
+		LOG_STRINGS_ITEM_DspId,
+		LOG_STRINGS_ITEM_FollowsOriginalSource,
+		LOG_STRINGS_ITEM_Ex3dSourceRandomPositionCalculationType,
+		LOG_STRINGS_ITEM_Ex3dSourceRandomPositionCalculationParameters,
+		LOG_STRINGS_ITEM_RandomPositionListMaxLength,
+		LOG_STRINGS_ITEM_ExPlaybackId_unique64,
+		LOG_STRINGS_ITEM_ExPlaybackId_Cause_unique64,
+		LOG_STRINGS_ITEM_parent_info_id_unique64,
+		LOG_STRINGS_ITEM_SoundVoiceId_unique64,
+		LOG_STRINGS_ITEM_TimeMsFloat,
+		LOG_STRINGS_ITEM_TimeMsInt16,
+		LOG_STRINGS_ITEM_ExMaxIgnoredCategories,
+		LOG_STRINGS_ITEM_NumDsp,
+		LOG_STRINGS_ITEM_ConfigParameters,
+		LOG_STRINGS_ITEM_DefaultParameters,
+		LOG_STRINGS_ITEM_AfxInterfacePtr,
+		LOG_STRINGS_ITEM_PitchShiftMode,
+		LOG_STRINGS_ITEM_WindowSize,
+		LOG_STRINGS_ITEM_OverlapTimes,
+		LOG_STRINGS_ITEM_PanInfoWideness,
+		LOG_STRINGS_ITEM_EnableAudioSyncedTimer,
+		LOG_STRINGS_ITEM_VoiceAllocationMethod,
+		LOG_STRINGS_ITEM_AcbBinderHn,
+		LOG_STRINGS_ITEM_AwbBinderHn,
+		LOG_STRINGS_ITEM_ExMp3VoicePoolConfig_PS5,
+		LOG_STRINGS_ITEM_ExMp3VoicePoolConfig_PS4,
+		LOG_STRINGS_ITEM_NumUsedPlayers,
+		LOG_STRINGS_ITEM_StartTimeUs,
+		LOG_STRINGS_ITEM_ExStopOption,
 	};
 
 	/* ログのパラメータ引数の型 */
@@ -1267,13 +1401,13 @@ public partial class CriProfiler
 		new LogParam( "3dPosVector_FocusPoint",         LogParamTypes.TYPE_VECTOR ),                /* 168 */
 		new LogParam( "3dPosVector_Cone",               LogParamTypes.TYPE_VECTOR ),                /* 169 */
 		new LogParam( "3dMaxAngleAisacDelta",           LogParamTypes.TYPE_FLOAT32 ),               /* 170 */
-		new LogParam( "3dEnablePriorityDecay",          LogParamTypes.TYPE_FLOAT32 ),               /* 171 */
+		new LogParam( "3dEnablePriorityDecay",          LogParamTypes.TYPE_INT32 ),                 /* 171 */
 		new LogParam( "3dDistanceFactor",               LogParamTypes.TYPE_FLOAT32 ),               /* 172 */
 		new LogParam( "3dDistanceFocusLevel",           LogParamTypes.TYPE_FLOAT32 ),               /* 173 */
 		new LogParam( "3dDirectionFocusLevel",          LogParamTypes.TYPE_FLOAT32 ),               /* 174 */
 		new LogParam( "Result3dPos",                    LogParamTypes.TYPE_INT8 ),                  /* 175 */
 		new LogParam( "CriAtomExAiffVoicePoolConfig",   LogParamTypes.TYPE_UINTPTR ),               /* 176 */
-		new LogParam( "SoundRendererTyoe",              LogParamTypes.TYPE_INT8 ),                  /* 177 */
+		new LogParam( "SoundRendererTyoe",              LogParamTypes.TYPE_INT32 ),                 /* 177 */
 		new LogParam( "CriAtomExAt9VoicePoolConfig_PS4",LogParamTypes.TYPE_UINTPTR ),               /* 178 */
 		new LogParam( "AverageServerTime",              LogParamTypes.TYPE_INT32 ),                 /* 179 */
 		new LogParam( "AverageServerInterval",          LogParamTypes.TYPE_INT32 ),                 /* 180 */
@@ -1496,6 +1630,89 @@ public partial class CriProfiler
 		new LogParam("DirectAuiodRadius",          		LogParamTypes.TYPE_FLOAT32 ),
 		new LogParam("CrossfadeDistance",          		LogParamTypes.TYPE_FLOAT32 ),
 		new LogParam("PreviewRackType",            		LogParamTypes.TYPE_INT32 ),
+		new LogParam("Flag",							LogParamTypes.TYPE_INT8 ),                 /* 398 */
+		new LogParam("ReactName",						LogParamTypes.TYPE_CHAR ),                 /* 399 */
+		new LogParam("EnableDecrementAisacModulationKey", LogParamTypes.TYPE_INT8 ),               /* 400 */
+		new LogParam("DecrementAisacModulationKey", 	LogParamTypes.TYPE_INT32 ),                /* 401 */
+		new LogParam("EnableIncrementAisacModulationKey", LogParamTypes.TYPE_INT8 ),               /* 402 */
+		new LogParam("IncrementAisacModulationKey", 	LogParamTypes.TYPE_INT32 ),                /* 403 */
+		new LogParam("DuckerLevel", 					LogParamTypes.TYPE_FLOAT32 ),              /* 404 */
+		new LogParam("DuckerTargetType", 				LogParamTypes.TYPE_INT32 ),                /* 405 */
+		new LogParam("FadeParameterEntryCurveType", 	LogParamTypes.TYPE_INT32 ),                /* 406 */
+		new LogParam("FadeParameterEntryCurveStrength", LogParamTypes.TYPE_FLOAT32 ),              /* 407 */
+		new LogParam("FadeParameterEntryFadeTimeMs", 	LogParamTypes.TYPE_INT16 ),                /* 408 */
+		new LogParam("FadeParameterExitCurveType", 		LogParamTypes.TYPE_INT32 ),                /* 409 */
+		new LogParam("FadeParameterExitCurveStrength", 	LogParamTypes.TYPE_FLOAT32 ),              /* 410 */
+		new LogParam("FadeParameterExitFadeTimeMs", 	LogParamTypes.TYPE_INT16 ),                /* 411 */
+		new LogParam("HoldType", 						LogParamTypes.TYPE_INT32 ),                /* 412 */
+		new LogParam("HoldTimeMs", 						LogParamTypes.TYPE_INT16 ),                /* 413 */
+		new LogParam("HoldTime",						LogParamTypes.TYPE_INT32 ),                /* 414 */
+		new LogParam("EnablePausingCue", 				LogParamTypes.TYPE_INT8 ),                 /* 415 */
+		new LogParam("InterfaceName", 					LogParamTypes.TYPE_CHAR ),                 /* 416 */
+		new LogParam("InstrumentName", 					LogParamTypes.TYPE_CHAR ),                 /* 417 */
+		new LogParam("ExInstrumentVoicePoolConfig", 	LogParamTypes.TYPE_UINTPTR ),              /* 418 */
+		new LogParam("ExAcbReleasedCallback", 			LogParamTypes.TYPE_UINTPTR ),              /* 419 */
+		new LogParam("AtomPlayerCallback", 				LogParamTypes.TYPE_UINTPTR ),              /* 420 */
+		new LogParam("EnableAtomSoundDisabledMode", 	LogParamTypes.TYPE_INT8 ),                 /* 421 */
+		new LogParam("EnableAutoMatchingInPanTypeAuto", LogParamTypes.TYPE_INT8 ),                 /* 422 */
+		new LogParam("EnableCategoryOverrideByExPlayer", LogParamTypes.TYPE_INT8 ),                /* 423 */
+		new LogParam("SequencePrepareRatio", 			LogParamTypes.TYPE_FLOAT32 ),              /* 424 */
+		new LogParam("FsThreadModel", 					LogParamTypes.TYPE_INT32 ),                /* 425 */
+		new LogParam("NumBinders", 						LogParamTypes.TYPE_INT32 ),                /* 426 */
+		new LogParam("NumGroupLoaders", 				LogParamTypes.TYPE_INT32 ),                /* 427 */
+		new LogParam("NumStdioHandles", 				LogParamTypes.TYPE_INT32 ),                /* 428 */
+		new LogParam("NumInstallers", 					LogParamTypes.TYPE_INT32 ),                /* 429 */
+		new LogParam("MaxBinds", 						LogParamTypes.TYPE_INT32 ),                /* 430 */
+		new LogParam("FsVersion", 						LogParamTypes.TYPE_INT32 ),                /* 431 */
+		new LogParam("FsVersionString", 				LogParamTypes.TYPE_CHAR ),                 /* 432 */
+		new LogParam("EnableCrcCheck", 					LogParamTypes.TYPE_INT8 ),                 /* 433 */
+		new LogParam("ExAcfLocationInfoType", 			LogParamTypes.TYPE_INT32 ),                /* 434 */
+		new LogParam("Version", 						LogParamTypes.TYPE_INT32 ),                /* 435 */
+		new LogParam("VersionEx", 						LogParamTypes.TYPE_INT32 ),                /* 436 */
+		new LogParam("VersionString", 					LogParamTypes.TYPE_CHAR ),                 /* 437 */
+		new LogParam("VersionExString", 				LogParamTypes.TYPE_CHAR ),                 /* 438 */
+		new LogParam("ExResourceType", 					LogParamTypes.TYPE_INT32 ),                /* 439 */
+		new LogParam("BusIndex", 						LogParamTypes.TYPE_INT32 ),                /* 440 */
+		new LogParam("DistanceFactor", 					LogParamTypes.TYPE_FLOAT32 ),              /* 441 */
+		new LogParam("ConeOrientation", 				LogParamTypes.TYPE_VECTOR ),               /* 442 */
+		new LogParam("IntervalMs", 						LogParamTypes.TYPE_INT32 ),                /* 443 */
+		new LogParam("HoldTimeMsSint32", 				LogParamTypes.TYPE_INT32 ),                /* 444 */
+		new LogParam("ShortTermTimeMs", 				LogParamTypes.TYPE_INT32 ),                /* 445 */
+		new LogParam("IntegratedTimeMs", 				LogParamTypes.TYPE_INT32 ),                /* 446 */
+		new LogParam("SampleClipping",					LogParamTypes.TYPE_INT8 ),                 /* 447 */
+		new LogParam("Marker_AtomExConfig", 			LogParamTypes.TYPE_INT8 ),                 /* 448 */
+		new LogParam("Marker_AsrConfig", 				LogParamTypes.TYPE_INT8 ),                 /* 449 */
+		new LogParam("Marker_HcaMxConfig", 				LogParamTypes.TYPE_INT8 ),                 /* 450 */
+		new LogParam("DspID", 							LogParamTypes.TYPE_INT32 ),                /* 451 */
+		new LogParam("FollowsOriginalSource", 			LogParamTypes.TYPE_INT8 ),                 /* 452 */
+		new LogParam("Ex3dSourceRandomPositionCalculationType", LogParamTypes.TYPE_INT32 ),        /* 453 */
+		new LogParam("Ex3dSourceRandomPositionCalculationParameters", LogParamTypes.TYPE_FLOAT32ARRAY ), /* 454 */
+		new LogParam("RandomPositionListMaxLength", 	LogParamTypes.TYPE_INT32 ),                /* 456 */
+		new LogParam("ExPlaybackId_unique64", 			LogParamTypes.TYPE_INT64 ),                /* 457 */
+		new LogParam("cause ExPlaybackId_unique64", 	LogParamTypes.TYPE_INT64 ),                /* 458 */
+		new LogParam("parent CriAtomExPlaybackId_unique64", LogParamTypes.TYPE_INT64 ),            /* 459 */
+		new LogParam("CriAtomSoundVoiceId_unique64",	LogParamTypes.TYPE_INT64 ),                /* 460 */
+	
+		new LogParam("TimeMsFloat", 					LogParamTypes.TYPE_FLOAT32 ),              /* 461 */
+		new LogParam("TimeMsInt16", 					LogParamTypes.TYPE_INT16 ),                /* 462 */
+		new LogParam("MaxIgnoredCategories", 			LogParamTypes.TYPE_INT32 ),                /* 463 */
+		new LogParam("NumDsp", 							LogParamTypes.TYPE_INT32 ),                /* 464 */
+		new LogParam("ConfigParameters", 				LogParamTypes.TYPE_FLOAT32ARRAY ),         /* 465 */
+		new LogParam("DefaultParameters", 				LogParamTypes.TYPE_FLOAT32ARRAY ),         /* 466 */
+		new LogParam("AfxInterfacePtr", 				LogParamTypes.TYPE_UINTPTR ),              /* 467 */
+		new LogParam("PitchShiftMode", 					LogParamTypes.TYPE_INT32 ),                /* 468 */
+		new LogParam("WindowSize", 						LogParamTypes.TYPE_INT32 ),                /* 469 */
+		new LogParam("OverlapTimes", 					LogParamTypes.TYPE_INT32 ),                /* 470 */
+		new LogParam("PanInfoWideness", 				LogParamTypes.TYPE_FLOAT32 ),              /* 471 */
+		new LogParam("EnableAudioSyncedTimer", 			LogParamTypes.TYPE_INT32 ),                /* 472 */
+		new LogParam("VoiceAllocationMethod", 			LogParamTypes.TYPE_INT32 ),                /* 473 */
+		new LogParam("ACBBinderHn", 					LogParamTypes.TYPE_UINTPTR ),              /* 474 */
+		new LogParam("AWBBinderHn", 					LogParamTypes.TYPE_UINTPTR ),              /* 475 */
+		new LogParam("ExMp3VoicePoolConfig_PS5", 		LogParamTypes.TYPE_UINTPTR ),              /* 476 */
+		new LogParam("ExMp3VoicePoolConfig_PS4", 		LogParamTypes.TYPE_UINTPTR ),              /* 477 */
+		new LogParam("NumUsedPlayers",					LogParamTypes.TYPE_INT32 ),                /* 478 */
+		new LogParam("StartTimeUs",						LogParamTypes.TYPE_INT64 ),                /* 479 */
+		new LogParam("ExStopOption",					LogParamTypes.TYPE_INT32 ),					/* 480 */
 	};
 
 	protected const uint LOG_MODE_OFF = 0;

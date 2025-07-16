@@ -12,19 +12,9 @@ public class BGMStarter : MonoBehaviour
     {
         bgm = GameObject.FindGameObjectWithTag("BGM");
         bgmController = bgm.GetComponent<BGMController>();
-        
 
-        if(thisScene != null)
-        {
-            if(thisScene == "Title")
-            {
-                bgmController.PlayBgm(BGMType.Title);
-            }
-            else if(thisScene == "InGame")
-            {
-                bgmController.PlayBgm(BGMType.InGame);
-            }
-        }
+        Invoke("BGMStart", 1.0f);
+
 
     }
 
@@ -32,5 +22,20 @@ public class BGMStarter : MonoBehaviour
     void Update()
     {
         
+    }
+
+    void BGMStart()
+    {
+        if (thisScene != null)
+        {
+            if (thisScene == "Title")
+            {
+                bgmController.PlayBgm(BGMType.Title);
+            }
+            else if (thisScene == "InGame")
+            {
+                bgmController.PlayBgm(BGMType.InGame);
+            }
+        }
     }
 }

@@ -143,8 +143,6 @@ public class CriAtomEx3dListener : CriDisposable
 	 * <para header='説明'>3Dリスナーの位置を設定します。<br/>
 	 * 位置は、距離減衰、および定位計算に使用されます。<br/>
 	 * 位置は、3次元ベクトルで指定します。<br/>
-	 * 位置の単位がいくつであるかは、3Dリスナーの距離計数
-	 * （ CriWare.CriAtomEx3dListener::SetDistanceFactor 関数で設定）で決まります。<br/>
 	 * デフォルト値は(0.0f, 0.0f, 0.0f)です。<br/>
 	 * データ側には位置は設定できないため、常に本関数での設定値が使用されます。<br/></para>
 	 * <para header='注意'>設定したパラメータを実際に適用するには、 CriWare.CriAtomEx3dListener::Update 関数を呼び出す必要があります。</para>
@@ -173,8 +171,6 @@ public class CriAtomEx3dListener : CriDisposable
 	 * 速度は、ドップラー効果の計算に使用されます。<br/>
 	 * 速度は、3次元ベクトルで指定します。<br/>
 	 * 速度の単位は、1秒あたりの移動距離です。<br/>
-	 * 距離の単位がいくつであるかは、3Dリスナーの距離計数
-	 * （ CriWare.CriAtomEx3dListener::SetDistanceFactor 関数で設定）で決まります。<br/>
 	 * デフォルト値は(0.0f, 0.0f, 0.0f)です。<br/>
 	 * データ側には速度は設定できないため、常に本関数での設定値が使用されます。<br/></para>
 	 * <para header='注意'>設定したパラメータを実際に適用するには、 CriWare.CriAtomEx3dListener::Update 関数を呼び出す必要があります。</para>
@@ -232,7 +228,7 @@ public class CriAtomEx3dListener : CriDisposable
 	/**
 	 * \deprecated
 	 * 削除予定の非推奨APIです。
-	 * CriWareErrorHandler.OnCallback event の使用を検討してください。
+	 * CriAtomEx3dListener.SetDopplerMultiplier の使用を検討してください。
 	 * <summary>3Dリスナーの距離係数の設定</summary>
 	 * <param name='distanceFactor'>距離係数</param>
 	 * <remarks>

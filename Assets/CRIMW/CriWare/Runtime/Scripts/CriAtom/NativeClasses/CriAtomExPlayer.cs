@@ -33,9 +33,9 @@ public class CriAtomExPlayer : CriDisposable
 	private event CriAtomExBeatSync.CbFunc _onBeatSyncCallback = null;
 
 	/**
-	 * <summary>シーケンスイベントコールバックの登録</summary>
+	 * <summary>ビート同期コールバックの登録</summary>
 	 * <remarks>
-	 * <para header='説明'>プレーヤで再生しているキューに埋め込まれたコールバックマーカー同期で実行するコールバック関数を登録します。<br/>
+	 * <para header='説明'>プレーヤで再生しているキューに埋め込まれたビート同期位置情報を受け取るコールバック関数を登録します。<br/>
 	 * 登録されたコールバック関数は、コールバックイベントを処理した直後の、アプリケーション
 	 * メインスレッドの更新タイミングで実行されます。<br/></para>
 	 * </remarks>
@@ -58,9 +58,9 @@ public class CriAtomExPlayer : CriDisposable
 	private event CriAtomExSequencer.EventCallback _onSequenceCallback = null;
 
 	/**
-	 * <summary>ビート同期コールバックの登録</summary>
+	 * <summary>シーケンスイベントコールバックの登録</summary>
 	 * <remarks>
-	 * <para header='説明'>プレーヤで再生しているキューに埋め込まれたビート同期位置情報を受け取るコールバック関数を登録します。<br/>
+	 * <para header='説明'>プレーヤで再生しているキューに埋め込まれたコールバックマーカー同期で実行するコールバック関数を登録します。<br/>
 	 * 登録されたコールバック関数は、コールバックイベントを処理した直後の、アプリケーション
 	 * メインスレッドの更新タイミングで実行されます。<br/></para>
 	 * </remarks>
@@ -1069,16 +1069,69 @@ public class CriAtomExPlayer : CriDisposable
 	}
 
 	/**
+	 * <summary>非同期再生開始</summary>
+	 * <param name='playbackId'>再生ID格納先ポインタ</param>
+	 * <returns>非同期再生の成功可否</returns>
+	 * <remarks>
+	 * <para header='説明'>音声データの再生処理を開始します。<br/>
+	 * 本関数はサーバースレッド処理をブロックせず、再生開始の予約のみを行います。<br/>
+	 * 再生IDを取得する場合、次回のサーバー処理完了後(次フレーム等)に<see cref='CriAtomExPlayer.GetLastPlaybackId'/>を利用してください。<br/>
+	 * 非同期再生の予約は1度のサーバー処理につき1回まで可能です。<br/>
+	 * 2度目以降の呼び出しでは、本メソッドはfalseを返したうえで<see cref='CriAtomExPlayer.Start'/>と同様にサーバースレッドをブロックした処理を行います。</para>
+	 * </remarks>
+	 * <seealso cref='CriAtomExPlayer.IsReadyToStartAsync'/>
+	 */
+	public bool StartAsync(IntPtr playbackId = default){
+		return criAtomExPlayer_StartAsync(this.handle, playbackId) != 0;
+	}
+
+	/**
+	 * <summary>非同期再生開始の可否を取得</summary>
+	 * <returns>非同期再生開始の可否</returns>
+	 * <remarks>
+	 * <para header='説明'><see cref='CriAtomExPlayer.StartAsync'/>による非同期再生の予約は、サーバー処理1回につき1回のみ可能です。<br/>
+	 * 現在のサーバー周期で既に非同期再生が予約されていた場合、本メソッドはfalseを返します。 <br/></para>
+	 * </remarks>
+	 */
+	public bool IsReadyToStartAsync(){
+		return criAtomExPlayer_IsReadyToStartAsync(this.handle) != 0;
+	}
+
+	/**
+	 * <summary>非同期再生停止</summary>
+	 * <remarks>
+	 * <para header='説明'>再生の停止を要求します。<br/>
+	 * 本関数はサーバースレッド処理をブロックせず、再生停止の予約のみを行います。</para>
+	 * </remarks>
+	 */
+	public void StopAsync(){
+		criAtomExPlayer_StopAsync(this.handle);
+	}
+
+	/**
+	 * <summary>最終再生IDの取得</summary>
+	 * <returns>再生ID</returns>
+	 * <remarks>
+	 * <para header='説明'>プレーヤーで最後に再生した音声の再生IDを取得します。</para>
+	 * </remarks>
+	 * <seealso cref='CriAtomExPlayer.Start'/>
+	 */
+	public CriAtomExPlayback GetLastPlaybackId()
+	{
+		return new CriAtomExPlayback(criAtomExPlayer_GetLastPlaybackId(this.handle));
+	}
+
+	/**
 	 * <summary>再生の停止</summary>
 	 * <param name='ignoresReleaseTime'>リリース時間を無視するかどうか
-	 * （false = リリース処理を行う、ture = リリース時間を無視して即座に停止する）</param>
+	 * （False = リリース処理を行う、True = リリース時間を無視して即座に停止する）</param>
 	 * <remarks>
 	 * <para header='説明'>再生の停止要求を発行します。<br/>
 	 * 音声再生中のAtomExプレーヤに対して本関数を実行すると、
 	 * AtomExプレーヤは再生を停止（ファイルの読み込みや、発音を停止）し、
 	 * ステータスを停止状態（ Stop ）に遷移します。<br/>
 	 * <br/>
-	 * 引数をtrueに設定した場合、
+	 * 引数をTrueに設定した場合、
 	 * 再生中の音声にエンベロープのリリースタイムが設定されていたとしても、
 	 * リリース時間を無視して音声を即座に停止します。<br/></para>
 	 * <para header='備考'>既に停止しているAtomExプレーヤ（ステータスが PlayEnd や Error のAtomExプレーヤ）
@@ -1156,7 +1209,7 @@ public class CriAtomExPlayer : CriDisposable
 
 	/**
 	 * <summary>ポーズ状態の取得</summary>
-	 * <returns>ポーズ中かどうか（false = ポーズされていない、true = ポーズ中）</returns>
+	 * <returns>ポーズ中かどうか（False = ポーズされていない、True = ポーズ中）</returns>
 	 * <remarks>
 	 * <para header='説明'>プレーヤがポーズ中かどうかを返します。<br/></para>
 	 * <para header='注意'>本関数が ture を返すのは、「全ての音声がポーズ中の場合」のみです。<br/>
@@ -2052,7 +2105,7 @@ public class CriAtomExPlayer : CriDisposable
 	 * <param name='aisacInfo'>AISAC情報取得用構造体</param>
 	 * <remarks>
 	 * <para header='説明'>プレーヤにアタッチされているAISACの情報を取得します。<br/></para>
-	 * <para header='注意'>無効なインデックスを指定した場合、falseが返ります。<br/></para>
+	 * <para header='注意'>無効なインデックスを指定した場合、Falseが返ります。<br/></para>
 	 * </remarks>
 	 */
 	public bool GetAttachedAisacInfo(int aisacAttachedIndex, out CriAtomEx.AisacInfo aisacInfo)
@@ -2188,7 +2241,9 @@ public class CriAtomExPlayer : CriDisposable
 	 * <para header='備考'>音声データ途中からの再生は、音声データ先頭からの再生に比べ、発音開始の
 	 * タイミングが遅くなります。<br/>
 	 * これは、一旦音声データのヘッダを解析後、指定位置にジャンプしてからデータを読み
-	 * 直して再生を開始するためです。</para>
+	 * 直して再生を開始するためです。<br/>
+	 * 設定した値は<see cref='CriAtomExPlayer.SetStartTimeMicro'/>による設定を上書きします。<br/>
+	 * 本パラメーターは <see cref='CriAtomExPlayer.ResetParameters'/> 関数にてクリアされます。<br/></para>
 	 * <para header='注意'>startTimeMs には64bit値をセット可能ですが、現状、32bit以上の再生時刻を
 	 * 指定することはできません。<br/>
 	 * <br/>
@@ -2201,6 +2256,34 @@ public class CriAtomExPlayer : CriDisposable
 	public void SetStartTime(long startTimeMs)
 	{
 		criAtomExPlayer_SetStartTime(this.handle, startTimeMs);
+	}
+
+	/**
+	 * <summary>再生開始位置の指定</summary>
+	 * <param name='startTimeUs'>再生開始位置（マイクロ秒指定）</param>
+	 * <remarks>
+	 * <para header='説明'>AtomExプレーヤーで再生する音声について、再生を開始する位置を指定します。<br/>
+	 * 音声データを途中から再生したい場合、再生開始前に本関数で再生開始位置を
+	 * 指定する必要があります。<br/>
+	 * 再生開始位置の指定はマイクロ秒単位で行います。<br/>
+	 * 例えば、<paramref name='startTimeUs'/> に 10000000 をセットして本関数を実行すると、
+	 * 次に再生する音声データは 10 秒目の位置から再生されます。<br/></para>
+	 * <para header='備考'>音声データ途中からの再生は、音声データ先頭からの再生に比べ、発音開始の
+	 * タイミングが遅くなります。<br/>
+	 * これは、一旦音声データのヘッダーを解析後、指定位置にジャンプしてからデータを読み
+	 * 直して再生を開始するためです。<br/>
+	 * 設定した値は<see cref='CriAtomExPlayer.SetStartTime'/>による設定を上書きします。<br/>
+	 * 本パラメーターは <see cref='CriAtomExPlayer.ResetParameters'/> 関数にてクリアされます。<br/>
+	 * 機種固有の音声フォーマットについても、再生開始位置を指定できない場合があります。<br/>
+	 * 
+	 * 再生開始位置を指定してシーケンスを再生した場合、指定位置よりも前に配置された
+	 * 波形データは再生されません。<br/>
+	 * （シーケンス内の個々の波形が途中から再生されることはありません。）<br/></para>
+	 * </remarks>
+	 */
+	public void SetStartTimeMicro(Int64 startTimeUs)
+	{
+		criAtomExPlayer_SetStartTimeMicro(this.handle, startTimeUs);
 	}
 
 	/**
@@ -2599,11 +2682,11 @@ public class CriAtomExPlayer : CriDisposable
 	 * リリースタイムには、0.0f～10000.0fの範囲で実数値を指定します。単位はms（ミリ秒）です。<br/>
 	 * リリースタイムのデフォルト値は0.0fです。<br/></para>
 	 * <para header='備考'>キュー再生時、データ側にリリースタイムが設定されている場合に本関数を呼び出すと、
-	 * データ側に設定されている値を<b>上書き</b>して適用されます（データ側の設定値は無視されます）。<br/></para>
-	 * <para header='注意'>再生中に CriWare.CriAtomExPlayer::Update 関数、 CriWare.CriAtomExPlayer::UpdateAll 関数によって
-	 * 更新することはできません。<br/>
+	 * データ側に設定されている値を<b>上書き</b>して適用されます（データ側の設定値は無視されます）。<br/>
 	 * <br/>
-	 * HCA-MX用にエンコードされた音声データには、エンベロープが適用されません。<br/>
+	 * リリースタイムの設定はリリース処理の直前まで変更可能です。 <br/>
+	 * <br/></para>
+	 * <para header='注意'>HCA-MX用にエンコードされた音声データには、エンベロープが適用されません。<br/>
 	 * エンベロープを使用したい音声は、ADXやHCA等、他のコーデックでエンコードしてください。<br/></para>
 	 * </remarks>
 	 * <example><code>
@@ -2891,7 +2974,7 @@ public class CriAtomExPlayer : CriDisposable
 	 * <returns>フェード処理中かどうか</returns>
 	 * <remarks>
 	 * <para header='説明'>フェード処理が行われている最中かどうかを取得します。<br/></para>
-	 * <para header='備考'>本関数は、以下の処理期間中 true を返します。<br/>
+	 * <para header='備考'>本関数は、以下の処理期間中 True を返します。<br/>
 	 * - クロスフェード開始のための同期待ち中。
 	 * - フェードイン／フェードアウト処理中（ボリューム変更中）。
 	 * - フェードアウト完了後のディレイ期間中。</para>
@@ -3250,7 +3333,7 @@ public class CriAtomExPlayer : CriDisposable
 
 	/**
 	 * <summary>ループ再生の切り替え</summary>
-	 * <param name='sw'>ループスイッチ（true: ループモード、false: ループモード解除）</param>
+	 * <param name='sw'>ループスイッチ（True: ループモード、False: ループモード解除）</param>
 	 * <remarks>
 	 * <para header='説明'>ループポイントを持たない波形データに対し、ループ再生のON/OFFを切り替えます。<br/>
 	 * デフォルトはループOFFです。<br/>
@@ -3509,7 +3592,7 @@ public class CriAtomExPlayer : CriDisposable
 	 * カーブの強さは 0.0f～2.0f の範囲で実数値を設定します。<br/>
 	 * カーブの強さのデフォルトは 1.0f です。<br/>
 	 * <br/>
-	 * 再生中に CriAtomExPlayer.Update 、 CriAtomExPlayer.UpdateAll によって更新することはできません。<br/>
+	 * リリースカーブの設定はリリース処理の直前まで変更可能です。 <br/>
 	 * <br/>
 	 * キュー再生時、データ側にリリースカーブが設定されている場合に本関数を呼び出すと、<br/>
 	 * データ側に設定されている値を<b>上書き</b>して適用されます（データ側の設定値は無視されます）。<br/>
@@ -3817,6 +3900,14 @@ public class CriAtomExPlayer : CriDisposable
 
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern uint criAtomExPlayer_Prepare(IntPtr player);
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern Int32 criAtomExPlayer_StartAsync(IntPtr player, IntPtr playback_id);
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern void criAtomExPlayer_StopAsync(IntPtr player);
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern Int32 criAtomExPlayer_IsReadyToStartAsync(IntPtr player);
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern UInt32 criAtomExPlayer_GetLastPlaybackId(IntPtr player);
 
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtomExPlayer_Stop(IntPtr player);
@@ -3884,6 +3975,8 @@ public class CriAtomExPlayer : CriDisposable
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtomExPlayer_SetStartTime(
 		IntPtr player, long start_time_ms);
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern void criAtomExPlayer_SetStartTimeMicro(IntPtr player, Int64 startTimeUs);
 
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtomExPlayer_SetSequencePrepareTime(
@@ -4160,6 +4253,10 @@ public class CriAtomExPlayer : CriDisposable
 	private static void criAtomExPlayer_SetVoicePoolIdentifier(IntPtr player, uint identifier) { }
 	private uint criAtomExPlayer_Start(IntPtr player) { _dummyStatus = Status.Prep; _dummyPaused = false; return 0u; }
 	private uint criAtomExPlayer_Prepare(IntPtr player) { _dummyStatus = Status.Prep; return 0u; }
+	private static Int32 criAtomExPlayer_StartAsync(IntPtr player, IntPtr playback_id){return 0;}
+	private static void criAtomExPlayer_StopAsync(IntPtr player){}
+	private static Int32 criAtomExPlayer_IsReadyToStartAsync(IntPtr player){return 0;}
+	private static UInt32 criAtomExPlayer_GetLastPlaybackId(IntPtr player){return 0;}
 	private void criAtomExPlayer_Stop(IntPtr player) { _dummyStatus = Status.Stop; }
 	private void criAtomExPlayer_StopWithoutReleaseTime(IntPtr player) { _dummyStatus = Status.Stop; }
 	private void criAtomExPlayer_Pause(IntPtr player, bool sw) { _dummyPaused = false; }
@@ -4189,6 +4286,7 @@ public class CriAtomExPlayer : CriDisposable
 	private static bool criAtomUnityEntryPool_EntryCue(IntPtr pool, IntPtr acbhn, string name, bool repeat) { return true; }
 	private static void criAtomUnityEntryPool_Clear(IntPtr pool) { }
 	private static void criAtomExPlayer_SetStartTime(IntPtr player, long start_time_ms) { }
+	private static void criAtomExPlayer_SetStartTimeMicro(IntPtr player, Int64 startTimeUs){}
 	private static void criAtomExPlayer_SetSequencePrepareTime(IntPtr player, uint seq_prep_time_ms) { }
 	private void criAtomExPlayer_LimitLoopCount(IntPtr player, int count) { _dummyLoop = (count == -3);  }
 	private static void criAtomExPlayer_Update(IntPtr player, uint id) { }

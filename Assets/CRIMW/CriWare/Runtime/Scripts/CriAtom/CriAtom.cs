@@ -64,6 +64,33 @@ public static class CriAtomPlugin
 	public static bool isInitialized { get { return initializationCount > 0; } }
 	
 	/**
+	 * <summary>Atomライブラリ初期化直前のイベント</summary>
+	 * <remarks>
+	 * <para header='説明'>Atomライブラリの初期化直前に呼び出されるコールバックイベントです。<br/>
+	 * ライブラリ初期化前に呼び出された後、内容がクリアされません。</para>
+	 * </remarks>
+	 */
+	public static event System.Action OnBeforeInitialize = null;
+
+	/**
+	 * <summary>Atomライブラリ初期化直後のイベント</summary>
+	 * <remarks>
+	 * <para header='説明'>Atomライブラリの初期化直後に呼び出されるコールバックイベントです。<br/>
+	 * ライブラリ初期化後に呼び出された後に、内容がクリアされます。</para>
+	 * </remarks>
+	 */
+	public static event System.Action OnInitialized = null;
+
+	/**
+	 * <summary>Atomライブラリ終了直前のイベント</summary>
+	 * <remarks>
+	 * <para header='説明'>Atomライブラリの終了直前に呼び出されるコールバックイベントです。<br/>
+	 * ライブラリ終了前に呼び出された後、内容がクリアされません。</para>
+	 * </remarks>
+	 */
+	public static event System.Action OnBeforeFinalize = null;
+
+	/**
 	 * <summary>Atomライブラリ終了直後のイベント</summary>
 	 * <remarks>
 	 * <para header='説明'>Atomライブラリの終了直後に呼び出されるコールバックイベントです。<br/>
@@ -145,7 +172,8 @@ public static class CriAtomPlugin
 		bool uses_in_game_preview, float server_frequency,
 		int max_parameter_blocks,  int categories_per_playback,
 		int max_faders, int num_buses, float max_pitch,
-		CriAtomEx.SoundRendererType sound_renderer_type, bool enable_sonicsync_for_common)
+		CriAtomEx.SoundRendererType sound_renderer_type, bool enable_sonicsync_for_common,
+		bool enable_atom_sound_disabled_mode)
 	{
 		criAtomUnity_SetConfigParameters(max_virtual_voices,
 			max_voice_limit_groups, max_categories,
@@ -157,7 +185,9 @@ public static class CriAtomPlugin
 			output_sampling_rate, num_asr_output_channels, speakerMapping,
 			uses_in_game_preview, server_frequency,
 			max_parameter_blocks, categories_per_playback,
-			max_faders, num_buses, max_pitch, sound_renderer_type, enable_sonicsync_for_common);
+			max_faders, num_buses, max_pitch, sound_renderer_type, enable_sonicsync_for_common,
+			enable_atom_sound_disabled_mode
+			);
 
 		CriAtomPlugin.isConfigured = true;
 	}
@@ -182,9 +212,9 @@ public static class CriAtomPlugin
 	}
 
 
-	public static void SetConfigAdditionalParameters_IOS(bool enable_sonicsync, uint buffering_time_ios, bool override_ipod_music_ios)
+	public static void SetConfigAdditionalParameters_IOS(bool enable_sonicsync, uint buffering_time_ios, bool override_ipod_music_ios, bool enable_os_notification_handling)
 	{
-		criAtomUnity_SetConfigAdditionalParameters_IOS(enable_sonicsync, buffering_time_ios, override_ipod_music_ios);
+		criAtomUnity_SetConfigAdditionalParameters_IOS(enable_sonicsync, buffering_time_ios, override_ipod_music_ios, enable_os_notification_handling);
 	}
 
 	public static void SetConfigAdditionalParameters_ANDROID(bool enable_sonicsync,
@@ -239,6 +269,8 @@ public static class CriAtomPlugin
 
 	public static void InitializeLibrary()
 	{
+		CriWare.Common.CheckBinaryVersionCompatibility();
+
 		/* 初期化カウンタの更新 */
 		CriAtomPlugin.initializationCount++;
 		if (CriAtomPlugin.initializationCount != 1) {
@@ -261,7 +293,10 @@ public static class CriAtomPlugin
 		CriFsPlugin.InitializeLibrary();
 
 		/* ライブラリの初期化 */
+		OnBeforeInitialize?.Invoke();
 		CriAtomPlugin.criAtomUnity_Initialize();
+		OnInitialized?.Invoke();
+		OnInitialized = null;
 
 
 		/* CriAtomServerのインスタンスを生成 */
@@ -314,6 +349,7 @@ public static class CriAtomPlugin
 		}
 
 		/* ライブラリの終了 */
+		OnBeforeFinalize?.Invoke();
 		CriAtomPlugin.criAtomUnity_Finalize();
 		OnFinalized?.Invoke();
 		OnFinalized = null;
@@ -321,6 +357,18 @@ public static class CriAtomPlugin
 		/* 依存ライブラリの終了 */
 		CriFsPlugin.FinalizeLibrary();
 	}
+
+#if UNITY_EDITOR
+	[UnityEditor.InitializeOnLoadMethod]
+	private static void ForceFinalize()
+	{
+		if(UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode){
+			return;
+		}
+		initializationCount = 1;
+		FinalizeLibrary();
+	}
+#endif
 
 	public static void Pause(bool pause)
 	{
@@ -330,7 +378,7 @@ public static class CriAtomPlugin
 	}
 
 	private static bool isConfigured = false;
-	private static float timeSinceStartup = Time.realtimeSinceStartup;
+	private static float timeSinceStartup = 0;
 	private static CriWare.Common.CpuUsage cpuUsage;
 	public static CriWare.Common.CpuUsage GetCpuUsage()
 	{
@@ -395,6 +443,37 @@ public static class CriAtomPlugin
 		return ret;
 	}
 
+	/**
+	 * <summary>キュー内の波形データの取得</summary>
+	 * <returns>取得に成功したか</returns>
+	 * <param name='acb'>ACBハンドル</param>
+	 * <param name='cueName'>キュー名</param>
+	 * <param name='decodeLpcmBuffer'>取得結果を格納する配列</param>
+	 * <remarks>
+	 * <para header='説明'>指定したキュー内の波形データを取得します。<br/>
+	 * キュー内に複数の波形が含まれる場合、取得の対象となるのは最初の1波形のみです。<br/>
+	 * <br/>
+	 * 取得したデータは[サンプル数*チャンネル数]の長さのインターリーブされた配列となります。<br/>
+	 * <paramref name='decodeLpcmBuffer'/>には十分な長さの配列を指定してください。<br/><code>
+	 * acbHandle.GetWaveFormInfo(cueName, out var waveformInfo);
+	 * var resultArray = new short[waveformInfo.numChannels * waveformInfo.numSamples];
+	 * CriAtomPlugin.GetWaveSamples(acbHandle, cueName, resultArray);
+	 * </code>
+	 * </para>
+	 * </remarks>
+	 */
+	public static bool GetWaveSamples(CriAtomExAcb acb, string cueName, System.Int16[] decodeLpcmBuffer)
+	{
+#if !UNITY_STANDALONE && !UNITY_EDITOR
+		throw new NotSupportedException("[CRIWARE] This platform does not support the method CriAtomPlugin.GetWaveSamples");
+#else
+		var handle = GCHandle.Alloc(decodeLpcmBuffer, GCHandleType.Pinned);
+		var result = criAtomUnityThumbnail_LoadWaveform(acb.nativeHandle, cueName, handle.AddrOfPinnedObject(), decodeLpcmBuffer.Length);
+		handle.Free();
+		return result;
+#endif
+	}
+
 
 
 
@@ -402,6 +481,12 @@ public static class CriAtomPlugin
 	#endregion
 
 	#region DLL Import
+#if !CRIWARE_ENABLE_HEADLESS_MODE && (UNITY_STANDALONE || UNITY_EDITOR)
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern bool criAtomUnityThumbnail_LoadWaveform(IntPtr acbHn, string cue_name, IntPtr decode_lpcm_buffer, System.Int64 decodeLpcmBufferLength);
+#else
+	private static bool criAtomUnityThumbnail_LoadWaveform(IntPtr acbHn, string cue_name, IntPtr decode_lpcm_buffer, System.Int64 decodeLpcmBufferLength) {return false;}
+#endif
 	#if !CRIWARE_ENABLE_HEADLESS_MODE
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtomUnity_SetConfigParameters(int max_virtual_voices,
@@ -415,7 +500,8 @@ public static class CriAtomPlugin
 		bool uses_in_game_preview, float server_frequency,
 		int max_parameter_blocks, int categories_per_playback,
 		int max_faders, int num_buses, float max_pitch,
-		CriAtomEx.SoundRendererType sound_renderer_type, bool enable_sonicsync_for_common);
+		CriAtomEx.SoundRendererType sound_renderer_type, bool enable_sonicsync_for_common,
+		bool enable_atom_sound_disabled_mode);
 
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtomUnity_SetConfigMonitorParameters(uint max_preivew_objects,
@@ -429,7 +515,7 @@ public static class CriAtomPlugin
 
 
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
-	private static extern void criAtomUnity_SetConfigAdditionalParameters_IOS(bool enable_sonicsync, uint buffering_time_ios, bool override_ipod_music_ios);
+	private static extern void criAtomUnity_SetConfigAdditionalParameters_IOS(bool enable_sonicsync, uint buffering_time_ios, bool override_ipod_music_ios, bool enable_os_notification_handling);
 
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtomUnity_SetConfigAdditionalParameters_ANDROID(bool enable_sonicsync, 
@@ -519,12 +605,13 @@ public static class CriAtomPlugin
 		bool uses_in_game_preview, float server_frequency,
 		int max_parameter_blocks, int categories_per_playback,
 		int max_faders, int num_buses, float max_pitch,
-		CriAtomEx.SoundRendererType sound_renderer_type, bool enable_sonicsync_for_common) { }
+		CriAtomEx.SoundRendererType sound_renderer_type, bool enable_sonicsync_for_common,
+		bool enable_atom_sound_disabled_mode) { }
 	private static void criAtomUnity_SetConfigMonitorParameters(uint max_preivew_objects,
 		uint communication_buffer_size, int playback_position_update_interval) { }
 	private static void criAtomUnity_SetConfigAdditionalParameters_EDITOR(bool enable_user_pcm_out_mode) { }
 	private static void criAtomUnity_SetConfigAdditionalParameters_PC(long buffering_time_pc, bool use_microsoft_spatial_sound) { }
-	private static void criAtomUnity_SetConfigAdditionalParameters_IOS(bool enable_sonicsync, uint buffering_time_ios, bool override_ipod_music_ios) { }
+	private static void criAtomUnity_SetConfigAdditionalParameters_IOS(bool enable_sonicsync, uint buffering_time_ios, bool override_ipod_music_ios, bool enable_os_notification_handling) { }
 	private static void criAtomUnity_SetConfigAdditionalParameters_ANDROID(bool enable_sonicsync, 
 																		   int num_low_delay_memory_voices, int num_low_delay_streaming_voices,
 																		   int sound_buffering_time,        int sound_start_buffering_time,
@@ -595,7 +682,7 @@ namespace CriWare {
  * </remarks>
  */
 [AddComponentMenu("CRIWARE/CRI Atom")]
-public class CriAtom : CriMonoBehaviour
+public partial class CriAtom : CriMonoBehaviour
 {
 		#region Types
 
@@ -617,6 +704,7 @@ public class CriAtom : CriMonoBehaviour
 			Ch5_1_2,     /**< 5.1.2ch */
 			Ch7_1_2,     /**< 7.1.2ch */
 			Ch7_1_4,     /**< 7.1.4ch */
+			Ch7_1_4_4,   /**< 7.1.4.4ch */
 			Ambisonics1p,/**< 1st order Ambisonics */
 			Ambisonics2p,/**< 2st order Ambisonics */
 			Ambisonics3p,/**< 3st order Ambisonics */
@@ -973,7 +1061,7 @@ public class CriAtom : CriMonoBehaviour
 	/**
 	 * <summary>バス情報取得を有効にします。</summary>
 	 * <param name='busName'>DSPバス名</param>
-	 * <param name='sw'>true: 取得を有効にする。 false: 取得を無効にする</param>
+	 * <param name='sw'>True: 取得を有効にする。 False: 取得を無効にする</param>
 	 */
 	public static void SetBusAnalyzer(string busName, bool sw)
 	{
@@ -990,7 +1078,7 @@ public class CriAtom : CriMonoBehaviour
 
 	/**
 	 * <summary>全てのバス情報取得を有効にします。</summary>
-	 * <param name='sw'>true: 取得を有効にする。 false: 取得を無効にする</param>
+	 * <param name='sw'>True: 取得を有効にする。 False: 取得を無効にする</param>
 	 */
 	public static void SetBusAnalyzer(bool sw)
 	{

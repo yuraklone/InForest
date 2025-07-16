@@ -27,11 +27,9 @@ using System.Runtime.InteropServices;
 [AddComponentMenu("CRIWARE/Error Handler")]
 public class CriWareErrorHandler : CriMonoBehaviour{
 	/**
-	 * \deprecated
-	 * 削除予定の非推奨APIです。本値は使用されていません。
 	 * <summary>コンソールデバッグ出力を有効にするかどうか</summary>
 	 * <remarks>
-	 * <para header='注意'>Unityデバッグウィンドウだけでなく、コンソールデバッグ出力を有効にするかどうか [deprecated]
+	 * <para header='注意'>Unityデバッグウィンドウではなく、コンソールデバッグ出力を有効にするかどうか
 	 * PCの場合はデバッグウィンドウに出力されます。</para>
 	 * </remarks>
 	 */
@@ -138,6 +136,7 @@ public class CriWareErrorHandler : CriMonoBehaviour{
 	public uint messageBufferCounts = 8;
 
 	private ConcurrentQueue<string> unThreadSafeMessages = new ConcurrentQueue<string>();
+	private static bool _enableDebugPrintOnTerminal = false;
 
 	/* オブジェクト作成時の処理 */
 	void Awake() {
@@ -162,6 +161,7 @@ public class CriWareErrorHandler : CriMonoBehaviour{
 	/* Execution Order の設定を確実に有効にするために OnEnable をオーバーライド */
 	protected override void OnEnable() {
 		base.OnEnable();
+		_enableDebugPrintOnTerminal = enableDebugPrintOnTerminal;
 		RegisterErrorCallback();
 
 		if (!CriErrorNotifier.IsRegistered(HandleMessage)) {
@@ -190,19 +190,18 @@ public class CriWareErrorHandler : CriMonoBehaviour{
 		}
 
 		/* エラー処理の終了処理 */
-		if (IsEnableNativePrintMessageFunc()) {
-			CriErrorNotifier.SetCallbackNative(IntPtr.Zero);
-			CriErrorNotifier.SetCallbackNative(CriErrorNotifier.GetManagedPluginFunc());
-		}
 		if (CriErrorNotifier.IsRegistered(HandleMessage)) {
 			CriErrorNotifier.OnCallbackThreadUnsafe -= HandleMessage;
 		}
+
+		CriErrorNotifier.SetCallbackNative(IntPtr.Zero);
 	}
 
 	private static bool IsEnableNativePrintMessageFunc() {
 		return !Application.isEditor
 			&& _onCallback == null
-			&& callback == null;
+			&& callback == null
+			&& _enableDebugPrintOnTerminal;
 	}
 
 	private static void RegisterErrorCallback() {

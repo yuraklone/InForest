@@ -17,6 +17,8 @@ using System.IO;
  * @{
  */
 
+ [assembly:InternalsVisibleTo("CriMw.CriWare.Editor")]
+
 namespace CriWare {
 
 /**
@@ -31,7 +33,7 @@ namespace CriWare {
 public class Common
 {
 	/* スクリプトバージョン */
-	private const string scriptVersionString = "2.42.46LE";
+	private const string scriptVersionString = "2.44.49LE";
 
 	/**
 	 * <summary>CriFsInstaller APIをサポートしているか</summary>
@@ -120,6 +122,26 @@ public class Common
 	}
 
 	/**
+	 * <summary>キャッシュ向けデータフォルダのパスです。</summary>
+	 * <remarks>
+	 * <para header='説明'>キャッシュ向けデータフォルダのパスを返します。<br/>
+	 * 本プロパティが返すディレクトリ以下にはアプリケーションからの書き込みが可能です。</para>
+	 * <para header='注意'>一部のプラットフォームでは永続的ではないパスを返します。<br/>
+	 * 本プロパティの返すパスが永続的か否かはプラットフォーム毎の AssetBundle キャッシングの有効/無効に従います。</para>
+	 * </remarks>
+	 */
+	public static string installCachePath
+	{
+		get {
+#if ENABLE_CACHING
+			return Caching.currentCacheForWriting.path;
+#else
+			return Application.temporaryCachePath;
+#endif
+		}
+	}
+
+	/**
 	 * <summary>StreamingAssetsフォルダからの相対パスとして利用されるかを判定します。</summary>
 	 * <param name='path'>ファイルパス</param>
 	 * <returns>StreamingAssetsフォルダからの相対パスとして利用されるか</returns>
@@ -180,29 +202,29 @@ public class Common
 	 */
 	public static int GetRequiredBinaryVersionNumber() {
 #if true
-		return 0x02423200;
+		return 0x02442000;
 #else
 #if UNITY_EDITOR
 		switch (Application.platform) {
 			case RuntimePlatform.WindowsEditor:
-				return 0x02423200;
+				return 0x02442000;
 			case RuntimePlatform.OSXEditor:
-				return 0x02423200;
+				return 0x02442000;
 			default:
-				return 0x02423200;
+				return 0x02442000;
 		}
 #elif UNITY_STANDALONE_WIN
-		return 0x02423200;
+		return 0x02442000;
 #elif UNITY_STANDALONE_OSX
-		return 0x02423200;
+		return 0x02442000;
 #elif UNITY_IOS
-		return 0x02423200;
+		return 0x02442000;
 #elif UNITY_TVOS
-		return 0x02423200;
+		return 0x02442000;
 #elif UNITY_ANDROID
-		return 0x02423200;
+		return 0x02442000;
 #else
-		return 0x02423200
+		return 0x02442000
 #endif
 #endif
     }
@@ -211,8 +233,8 @@ public class Common
 	 * <summary>バイナリバージョンとスクリプトバージョンの整合性チェック</summary>
 	 * <remarks>
 	 * <para header='説明'>本メソッドは現在のバイナリがスクリプトの要求するバージョン番号と一致するかチェックします。<br/>
-	 * 一致していれば整合性チェックに成功とみなし、trueを返します。<br/>
-	 * 不一致であれば失敗とみなし、コンソールにエラーメッセージを出力した後でfalseを返します。</para>
+	 * 一致していれば整合性チェックに成功とみなし、Trueを返します。<br/>
+	 * 不一致であれば失敗とみなし、コンソールにエラーメッセージを出力した後でFalseを返します。</para>
 	 * </remarks>
 	 */
     public static bool CheckBinaryVersionCompatibility() {

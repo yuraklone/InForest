@@ -79,7 +79,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bgmSource: {fileID: 4875671307627122953}
-  titleBGMName: 
+  titleBGMName: ToForest
   inGameBGMName: CalmLand
-  fadeInTime: 2000
-  fadeOutTime: 2000
+  fadeInTime: 1500
+  fadeOutTime: 1500

@@ -83,6 +83,9 @@ public class CriAtomExAcb : CriDisposable
 		}
 
 		IntPtr binderHandle = (binder != null) ? binder.nativeHandle : IntPtr.Zero;
+		if(string.IsNullOrEmpty(awbPath)){
+			awbPath = null;
+		}
 		IntPtr handle = criAtomExAcb_LoadAcbFile(
 			binderHandle, acbPath, binderHandle, awbPath, IntPtr.Zero, 0);
 		if (handle == IntPtr.Zero) {
@@ -141,6 +144,9 @@ public class CriAtomExAcb : CriDisposable
 
 		IntPtr binderHandle = (awbBinder != null) ? awbBinder.nativeHandle : IntPtr.Zero;
 		GCHandle gch = GCHandle.Alloc(acbData, GCHandleType.Pinned);
+		if(string.IsNullOrEmpty(awbPath)){
+			awbPath = null;
+		}
 		IntPtr handle = criAtomExAcb_LoadAcbData(
 			gch.AddrOfPinnedObject(), acbData.Length, binderHandle, awbPath, IntPtr.Zero, 0);
 		if (handle == IntPtr.Zero) {
@@ -199,6 +205,9 @@ public class CriAtomExAcb : CriDisposable
 		}
 
 		IntPtr binderHandle = (awbBinder != null) ? awbBinder.nativeHandle : IntPtr.Zero;
+		if(string.IsNullOrEmpty(awbPath)){
+			awbPath = null;
+		}
 		IntPtr handle = criAtomExAcb_LoadAcbData(acbData, dataSize, binderHandle, awbPath, IntPtr.Zero, 0);
 		if (handle == IntPtr.Zero) {
 			return null;
@@ -245,10 +254,10 @@ public class CriAtomExAcb : CriDisposable
 	/**
 	 * <summary>キューの存在確認（キュー名指定）</summary>
 	 * <param name='cueName'>キュー名</param>
-	 * <returns>キューが存在するかどうか（存在する：true、存在しない：false）</returns>
+	 * <returns>キューが存在するかどうか（存在する：True、存在しない：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>指定した名前のキューが存在するかどうかを取得します。<br/>
-	 * 存在した場合にはtrueを返します。<br/></para>
+	 * 存在した場合にはTrueを返します。<br/></para>
 	 * </remarks>
 	 */
 	public bool Exists(string cueName)
@@ -259,10 +268,10 @@ public class CriAtomExAcb : CriDisposable
 	/**
 	 * <summary>キューの存在確認（キューID指定）</summary>
 	 * <param name='cueId'>キューID</param>
-	 * <returns>キューが存在するかどうか（存在する：true、存在しない：false）</returns>
+	 * <returns>キューが存在するかどうか（存在する：True、存在しない：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>指定したIDのキューが存在するかどうかを取得します。<br/>
-	 * 存在した場合にはtrueを返します。<br/></para>
+	 * 存在した場合にはTrueを返します。<br/></para>
 	 * </remarks>
 	 */
 	public bool Exists(int cueId)
@@ -274,10 +283,10 @@ public class CriAtomExAcb : CriDisposable
 	 * <summary>キュー情報の取得（キュー名指定）</summary>
 	 * <param name='cueName'>キュー名</param>
 	 * <param name='info'>キュー情報</param>
-	 * <returns>取得に成功したかどうか（成功：true、失敗：false）</returns>
+	 * <returns>取得に成功したかどうか（成功：True、失敗：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>キュー名を指定して、キュー情報を取得します。<br/>
-	 * 指定した名前のキューが存在しない場合、falseが返ります。<br/></para>
+	 * 指定した名前のキューが存在しない場合、Falseが返ります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExAcb::GetCueInfoByIndex'/>
 	 */
@@ -294,10 +303,10 @@ public class CriAtomExAcb : CriDisposable
 	 * <summary>キュー情報の取得（キューID指定）</summary>
 	 * <param name='cueId'>キューID</param>
 	 * <param name='info'>キュー情報</param>
-	 * <returns>取得に成功したかどうか（成功：true、失敗：false）</returns>
+	 * <returns>取得に成功したかどうか（成功：True、失敗：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>キューIDを指定して、キュー情報を取得します。<br/>
-	 * 指定したIDのキューが存在しない場合、falseが返ります。<br/></para>
+	 * 指定したIDのキューが存在しない場合、Falseが返ります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExAcb::GetCueInfoByIndex'/>
 	 */
@@ -314,10 +323,10 @@ public class CriAtomExAcb : CriDisposable
 	 * <summary>キュー情報の取得（キューインデックス指定）</summary>
 	 * <param name='index'>キューインデックス</param>
 	 * <param name='info'>キュー情報</param>
-	 * <returns>取得に成功したかどうか（成功：true、失敗：false）</returns>
+	 * <returns>取得に成功したかどうか（成功：True、失敗：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>キューインデックスを指定して、キュー情報を取得します。<br/>
-	 * 指定したインデックスのキューが存在しない場合、falseが返ります。<br/></para>
+	 * 指定したインデックスのキューが存在しない場合、Falseが返ります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExAcb::GetCueInfo'/>
 	 */
@@ -353,7 +362,7 @@ public class CriAtomExAcb : CriDisposable
 	 * <summary>音声波形情報の取得（キュー名指定）</summary>
 	 * <param name='cueName'>キュー名</param>
 	 * <param name='info'>音声波形情報</param>
-	 * <returns>取得に成功したかどうか（成功：true、失敗：false）</returns>
+	 * <returns>取得に成功したかどうか（成功：True、失敗：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>キュー名を指定して、そのキューで再生される音声波形の情報を取得します。<br/>
 	 * そのキューで再生される音声波形が複数ある場合、
@@ -374,12 +383,12 @@ public class CriAtomExAcb : CriDisposable
 	 * <summary>音声波形情報の取得（キューID指定）</summary>
 	 * <param name='cueId'>キューID</param>
 	 * <param name='info'>音声波形情報</param>
-	 * <returns>取得に成功したかどうか（成功：true、失敗：false）</returns>
+	 * <returns>取得に成功したかどうか（成功：True、失敗：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>キューIDを指定して、そのキューで再生される音声波形の情報を取得します。<br/>
 	 * そのキューで再生される音声波形が複数ある場合、
 	 * 初めのトラックで初めに再生される音声波形の情報が取得されます。
-	 * 指定したIDのキューが存在しない場合、falseが返ります。<br/></para>
+	 * 指定したIDのキューが存在しない場合、Falseが返ります。<br/></para>
 	 * </remarks>
 	 */
 	public bool GetWaveFormInfo(int cueId, out CriAtomEx.WaveformInfo info)
@@ -486,10 +495,10 @@ public class CriAtomExAcb : CriDisposable
 	 * <param name='cueName'>キュー名</param>
 	 * <param name='index'>AISAC Controlインデックス</param>
 	 * <param name='info'>AISAC Control情報</param>
-	 * <returns>取得に成功したかどうか（成功：true、失敗：false）</returns>
+	 * <returns>取得に成功したかどうか（成功：True、失敗：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>キュー名とAISAC Controlインデックスを指定して、AISAC Control情報を取得します。<br/>
-	 * 指定した名前のキューが存在しない場合は、falseが返ります。<br/></para>
+	 * 指定した名前のキューが存在しない場合は、Falseが返ります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExAcb::GetNumUsableAisacControls'/>
 	 */
@@ -507,10 +516,10 @@ public class CriAtomExAcb : CriDisposable
 	 * <param name='cueId'>キューID</param>
 	 * <param name='index'>AISAC Controlインデックス</param>
 	 * <param name='info'>AISAC Control情報</param>
-	 * <returns>取得に成功したかどうか（成功：true、失敗：false）</returns>
+	 * <returns>取得に成功したかどうか（成功：True、失敗：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>キューIDとAISAC Controlインデックスを指定して、AISAC Control情報を取得します。<br/>
-	 * 指定したIDのキューが存在しない場合は、falseが返ります。<br/></para>
+	 * 指定したIDのキューが存在しない場合は、Falseが返ります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExAcb::GetNumUsableAisacControls'/>
 	 */
@@ -622,7 +631,7 @@ public class CriAtomExAcb : CriDisposable
 
 	/**
 	 * <summary>ACBハンドルの即時解放状態の取得</summary>
-	 * <returns>ACBの状態（true = 即時解放可能、false = 再生中のプレーヤあり）</returns>
+	 * <returns>ACBの状態（True = 即時解放可能、False = 再生中のプレーヤあり）</returns>
 	 * <remarks>
 	 * <para header='説明'>ACBハンドルを即座に解放可能かどうかをチェックします。<br/>
 	 * 本関数が false を返すタイミングで CriWare.CriAtomExAcb::Dispose 関数を実行すると、
@@ -636,6 +645,24 @@ public class CriAtomExAcb : CriDisposable
 		if (this.isAvailable) {
 			bool result = criAtomExAcb_IsReadyToRelease(this.handle);
 			return result;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * <summary>ストリーム用AWBファイルのアタッチ状態取得</summary>
+	 * <param name='awbName'>AWB名</param>
+	 * <remarks>
+	 * <para header='説明'>ACBオブジェクトにAWBファイルがアタッチされているかを取得します。
+	 * <paramref name='awbName'/>はAWBをアタッチするスロット名です。状態を取得したいスロットのAWB名を指定してください。</para>
+	 * </remarks>
+	 * <seealso cref='CriAtomExAcb.AttachAwbFile'/>
+	 */
+	public bool IsAttachedAwbFile(string awbName)
+	{
+		if (this.isAvailable) { 
+			return criAtomExAcb_IsAttachedAwbFile(this.handle, awbName);
 		} else {
 			return false;
 		}
@@ -743,6 +770,8 @@ public class CriAtomExAcb : CriDisposable
 
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern bool criAtomExAcb_IsReadyToRelease(IntPtr acb_hn);
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern bool criAtomExAcb_IsAttachedAwbFile(IntPtr acbHn, string awbName);
 
 	#else
 	private static IntPtr criAtomExAcb_LoadAcbFile(IntPtr acb_binder, string acb_path,
@@ -776,6 +805,7 @@ public class CriAtomExAcb : CriDisposable
 									string awb_path, string awb_name, IntPtr work, int work_size) { }
 	private static void criAtomExAcb_DetachAwbFile(IntPtr acb_hn, string awb_name) { }
 	private static bool criAtomExAcb_IsReadyToRelease(IntPtr acb_hn) { return false; }
+	private static bool criAtomExAcb_IsAttachedAwbFile(IntPtr acbHn, string awbName){return false;}
 	#endif
 	#endregion
 }
@@ -829,6 +859,9 @@ public class CriAtomExAcbLoader : CriDisposable
 		config.shouldLoadAwbOnMemory = loadAwbOnMemory;
 		IntPtr handle = criAtomExAcbLoader_Create(ref config);
 		if (handle == IntPtr.Zero) { return null; }
+		if(string.IsNullOrEmpty(awbPath)){
+			awbPath = null;
+		}
 		bool result = criAtomExAcbLoader_LoadAcbFileAsync(handle, binderHandle, acbPath, binderHandle, awbPath);
 		if (result == false) {
 			criAtomExAcbLoader_Destroy(handle);
@@ -865,6 +898,9 @@ public class CriAtomExAcbLoader : CriDisposable
 		IntPtr handle = criAtomExAcbLoader_Create(ref config);
 		if (handle == IntPtr.Zero) { return null; }
 		GCHandle dataHandle = GCHandle.Alloc(acbData, GCHandleType.Pinned);
+		if(string.IsNullOrEmpty(awbPath)){
+			awbPath = null;
+		}
 		bool result = criAtomExAcbLoader_LoadAcbDataAsync(handle, dataHandle.AddrOfPinnedObject(), acbData.Length, binderHandle, awbPath);
 		if (result == false) {
 			criAtomExAcbLoader_Destroy(handle);
@@ -901,6 +937,9 @@ public class CriAtomExAcbLoader : CriDisposable
 		config.shouldLoadAwbOnMemory = loadAwbOnMemory;
 		IntPtr handle = criAtomExAcbLoader_Create(ref config);
 		if (handle == IntPtr.Zero) { return null; }
+		if(string.IsNullOrEmpty(awbPath)){
+			awbPath = null;
+		}
 		bool result = criAtomExAcbLoader_LoadAcbDataAsync(handle, acbData, dataSize, binderHandle, awbPath);
 		if (result == false) {
 			criAtomExAcbLoader_Destroy(handle);

@@ -288,7 +288,10 @@ public partial class CriAtomExAsrRack : CriDisposable
 	#endif
 		this._rackId = existingRackId;
 		this.hasExistingRackId = true;
-		CriDisposableObjectManager.Register(this, CriDisposableObjectManager.ModuleType.Atom);
+#if CRIWARE_SUPPORT_ASR
+		if(existingRackId != defaultRackId)
+			CriDisposableObjectManager.Register(this, CriDisposableObjectManager.ModuleType.Atom);
+#endif
 	}
 
 	/**
@@ -495,12 +498,15 @@ public partial class CriAtomExAsrRack : CriDisposable
 	public override void Dispose()
 	{
 	#if CRIWARE_SUPPORT_ASR
-		CriDisposableObjectManager.Unregister(this);
-
-		if (this._rackId != -1 && !this.hasExistingRackId) {
-			criAtomExAsrRack_Destroy(this._rackId);
+		if(this.rackId != defaultRackId)
+		{
+			CriDisposableObjectManager.Unregister(this);
+			
+			if (this._rackId != -1 && !this.hasExistingRackId) {
+				criAtomExAsrRack_Destroy(this._rackId);
+			}
+			this._rackId = IllegalRackId;
 		}
-		this._rackId = IllegalRackId;
 	#endif
 		GC.SuppressFinalize(this);
 	}
@@ -523,6 +529,83 @@ public partial class CriAtomExAsrRack : CriDisposable
 	}
 
 	/**
+	 * <summary>Ambisonics再生用ASRラックIDを取得</summary>
+	 * <returns>ASRラックID</returns>
+	 * <remarks>
+	 * <para header='説明'>Ambisonics再生に使用するASRラックIDを取得します。<br/>
+	 * 取得したIDは <see cref='CriAtomExAsrRack.CriAtomExAsrRack(CriAtomExAsrRackId)'/> によって<br/>
+	 * CriAtomExAsrRackオブジェクトとして取り扱えます。<br/>
+	 * <br/>
+	 * Ambisonics再生用ASRラックは、出力ポート「_ambisonics」の設定があるACFの登録により自動で作成されます。<br/>
+	 * 取得したASRラックIDはACF登録中のみ有効です。<br/>
+	 * ACFの登録を解除すると、Ambisonics再生用ASRラックも削除されるため取得したASRラックIDは無効になります。<br/>
+	 * Ambisonics再生用ASRラックが作成されていない場合、 <see cref='CriAtomExAsrRack.IllegalRackId'/> を返します。</para>
+	 * </remarks>
+	 * <seealso cref='CriAtomExAsrRack.CriAtomExAsrRack(CriAtomExAsrRackId)'/>
+	 */
+	public static CriAtomExAsrRackId GetAmbisonicRackId() {
+		return criAtomExAsrRack_GetAmbisonicRackId();
+	}
+
+	/**
+	 * <summary>チャンネルベース 再生用ASRラックIDを取得</summary>
+	 * <returns>ASRラックID</returns>
+	 * <remarks>
+	 * <para header='説明'>チャンネルベース再生に使用するASRラックIDを取得します。<br/>
+	 * 取得したIDは <see cref='CriAtomExAsrRack.CriAtomExAsrRack(CriAtomExAsrRackId)'/> によって<br/>
+	 * CriAtomExAsrRackオブジェクトとして取り扱えます。<br/>
+	 * <br/>
+	 * チャンネルベース再生用ASRラックは、出力ポート「_7_1_4」の設定で<br/>
+	 * 「専用のミキサーを使用する」にTrueを指定しているACFの登録により自動で作成されます。<br/>
+	 * 取得したASRラックIDはACF登録中のみ有効です。<br/>
+	 * ACFの登録を解除すると、チャンネルベース再生用ASRラックも削除されるため取得したASRラックIDは無効になります。<br/>
+	 * チャンネルベース再生用ASRラックが作成されていない場合、 <see cref='CriAtomExAsrRack.IllegalRackId'/> を返します。</para>
+	 * </remarks>
+	 * <seealso cref='CriAtomExAsrRack.CriAtomExAsrRack(CriAtomExAsrRackId)'/>
+	 */
+	public static CriAtomExAsrRackId GetChannelBasedAudioRackId() {
+		return criAtomExAsrRack_GetChannelBasedAudioRackId();
+	}
+
+	/**
+	 * <summary>ObjectBasedAudio 再生用ASRラックIDを取得</summary>
+	 * <returns>ASRラックID</returns>
+	 * <remarks>
+	 * <para header='説明'>ObjectBasedAudio再生に使用するASRラックIDを取得します。<br/>
+	 * 取得したIDは <see cref='CriAtomExAsrRack.CriAtomExAsrRack(CriAtomExAsrRackId)'/> によって<br/>
+	 * CriAtomExAsrRackオブジェクトとして取り扱えます。<br/>
+	 * <br/>
+	 * ObjectBasedAudio再生用ASRラックは、出力ポート「_object_based_audio」の設定があるACFの登録により自動で作成されます。<br/>
+	 * 取得したASRラックIDはACF登録中のみ有効です。<br/>
+	 * ACFの登録を解除すると、ObjectBasedAudio再生用ASRラックも削除されるため取得したASRラックIDは無効になります。<br/>
+	 * ObjectBasedAudio再生用ASRラックが作成されていない場合、 <see cref='CriAtomExAsrRack.IllegalRackId'/> を返します。</para>
+	 * </remarks>
+	 * <seealso cref='CriAtomExAsrRack.CriAtomExAsrRack(CriAtomExAsrRackId)'/>
+	 */
+	public static CriAtomExAsrRackId GetObjectBasedAudioRackId() {
+		return criAtomExAsrRack_GetObjectBasedAudioRackId();
+	}
+
+	/**
+	 * <summary>パススルー再生用ASRラックIDを取得</summary>
+	 * <returns>ASRラックID</returns>
+	 * <remarks>
+	 * <para header='説明'>パススルー 再生のみを行うASRラックのIDを取得します。<br/>
+	 * 取得したIDは <see cref='CriAtomExAsrRack.CriAtomExAsrRack(CriAtomExAsrRackId)'/> によって<br/>
+	 * CriAtomExAsrRackオブジェクトとして取り扱えます。<br/>
+	 * <br/>
+	 * パススルー再生用ASRラックは、出力ポート「_pass_through」の設定があるACFの登録により自動で作成されます。<br/>
+	 * 取得したASRラックIDはACF登録中のみ有効です。<br/>
+	 * ACFの登録を解除すると、パススルー再生用ASRラックも削除されるため取得したASRラックIDは無効になります。<br/>
+	 * パススルー再生用ASRラックが作成されていない場合、 <see cref='CriAtomExAsrRack.IllegalRackId'/> を返します。</para>
+	 * </remarks>
+	 * <seealso cref='CriAtomExAsrRack.CriAtomExAsrRack(CriAtomExAsrRackId)'/>
+	 */
+	public static CriAtomExAsrRackId GetPassThroughRackId() {
+		return criAtomExAsrRack_GetPassThroughRackId();
+	}
+
+	/**
 	 * <summary>ASRラックIDの取得</summary>
 	 * <remarks>
 	 * <para header='説明'>ASRラックオブジェクトのIDを取得します。</para>
@@ -532,6 +615,14 @@ public partial class CriAtomExAsrRack : CriDisposable
 		get { return this._rackId; }
 	}
 
+	/**
+	 * <summary>デフォルトASRラック</summary>
+	 * <remarks>
+	 * <para header='説明'>初期化時に自動的に作成されるASRラックです。</para>
+	 * </remarks>
+	 */
+	public static CriAtomExAsrRack Default { get; } = new CriAtomExAsrRack(defaultRackId);
+
 	#region Static Properties
 	/**
 	 * \deprecated
@@ -540,8 +631,7 @@ public partial class CriAtomExAsrRack : CriDisposable
 	 * <summary>デフォルトコンフィギュレーション</summary>
 	 * <remarks>
 	 * <para header='説明'>デフォルトコンフィグです。</para>
-	 * <para header='備考'>本プロパティで取得したデフォルトコンフィギュレーションを必要に応じて変更して
-	 * CriWare.CriAtomExAsrRack::CriAtomExAsrRack 関数に指定してください。<br/></para>
+	 * <para header='備考'>本プロパティで取得したデフォルトコンフィギュレーションを必要に応じて変更して</para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExAsrRack::CriAtomExAsrRack'/>
 	 */
@@ -648,12 +738,24 @@ public partial class CriAtomExAsrRack : CriDisposable
 	private static extern void criAtomExAsrRack_SetAisacControlByName(Int32 rackId, string controlName, float value);
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtomExAsrRack_GetNumRenderedSamples(CriAtomExAsrRackId rack_id, ref Int64 num_samples, ref Int32 sampling_rate);
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern CriAtomExAsrRackId criAtomExAsrRack_GetAmbisonicRackId();
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern CriAtomExAsrRackId criAtomExAsrRack_GetChannelBasedAudioRackId();
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern CriAtomExAsrRackId criAtomExAsrRack_GetObjectBasedAudioRackId();
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern CriAtomExAsrRackId criAtomExAsrRack_GetPassThroughRackId();
 	#else
 	private static void criAtomExAsrRack_GetPerformanceInfo(Int32 rackId, out PerformanceInfo perfInfo) { perfInfo = new PerformanceInfo(); }
 	private static void criAtomExAsrRack_ResetPerformanceMonitor(Int32 rackId) { }
 	private static void criAtomExAsrRack_SetAisacControlById(Int32 rackId, ushort controlId, float value) { }
 	private static void criAtomExAsrRack_SetAisacControlByName(Int32 rackId, string controlName, float value) { }
 	private static void criAtomExAsrRack_GetNumRenderedSamples(CriAtomExAsrRackId rack_id, ref Int64 num_samples, ref Int32 sampling_rate) { }
+	private static CriAtomExAsrRackId criAtomExAsrRack_GetAmbisonicRackId() { return CriAtomExAsrRack.IllegalRackId; }
+	private static CriAtomExAsrRackId criAtomExAsrRack_GetChannelBasedAudioRackId() { return CriAtomExAsrRack.IllegalRackId; }
+	private static CriAtomExAsrRackId criAtomExAsrRack_GetObjectBasedAudioRackId() { return CriAtomExAsrRack.IllegalRackId; }
+	private static CriAtomExAsrRackId criAtomExAsrRack_GetPassThroughRackId() { return CriAtomExAsrRack.IllegalRackId; }
 	#endif
 
 	#endif

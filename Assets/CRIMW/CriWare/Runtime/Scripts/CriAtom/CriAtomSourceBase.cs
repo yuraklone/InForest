@@ -92,7 +92,7 @@ namespace CriWare {
 		/**
 		 * <summary>実行開始時に再生するかどうかを設定／取得します。</summary>
 		 * <remarks>
-		 * <para header='説明'>trueが設定されていると、実行開始時に再生を開始します。</para>
+		 * <para header='説明'>Trueが設定されていると、実行開始時に再生を開始します。</para>
 		 * <para header='備考'>再生開始が行われるタイミングは、MonoBehaviour::Start 関数が呼ばれるタイミングです。</para>
 		 * <para header='注意'>WebGL などの非同期 ACB ロードが有効なプラットフォームで本フラグによる
 		 * 実行開始時のキュー再生を行う場合は、必ずキューシート名を指定してください。<br/>
@@ -293,7 +293,7 @@ namespace CriWare {
 
 		/**
 		 * <summary>ループ再生の切り替え</summary>
-		 * <param name='loop'>ループスイッチ（true: ループモード、false: ループモード解除）</param>
+		 * <param name='loop'>ループスイッチ（True: ループモード、False: ループモード解除）</param>
 		 * <remarks>
 		 * <para header='説明'>ループポイントを持たない波形データに対し、ループ再生のON/OFFを切り替えます。<br/>
 		 * デフォルトはループOFFです。<br/>
@@ -586,7 +586,7 @@ namespace CriWare {
 		/**
 		 * <summary>低遅延再生ボイスプールから再生を行うかどうかを設定／取得します。</summary>
 		 * <remarks>
-		 * <para header='説明'>trueが設定されていると、低遅延再生ボイスプールを使って再生を開始します。</para>
+		 * <para header='説明'>Trueが設定されていると、低遅延再生ボイスプールを使って再生を開始します。</para>
 		 * <para header='備考'>本フラグを有効にする場合は、CriWareInitializerの低遅延再生ボイスプール数を設定しておく必要があります。</para>
 		 * </remarks>
 		 */
@@ -892,12 +892,12 @@ namespace CriWare {
 
 		/**
 		 * <summary>一時停止／再開します。</summary>
-		 * <param name='sw'>true:一時停止、false:再開</param>
+		 * <param name='sw'>True:一時停止、False:再開</param>
 		 * <remarks>
 		 * <para header='説明'>再生のポーズ／ポーズ解除を行います。<br/>
-		 * sw に true を指定して本関数を実行すると、 CriAtomSource
+		 * sw に True を指定して本関数を実行すると、 CriAtomSource
 		 * コンポーネントは再生中の音声をポーズ（一時停止）します。<br/>
-		 * sw に false を指定して本関数を実行すると、 CriAtomSource
+		 * sw に False を指定して本関数を実行すると、 CriAtomSource
 		 * コンポーネントはポーズを解除し、一時停止していた音声の再生を再開します。<br/></para>
 		 * </remarks>
 		 */

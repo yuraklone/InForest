@@ -91,7 +91,7 @@ public struct CriAtomExPlayback
 	/**
 	 * <summary>再生音の停止</summary>
 	 * <param name='ignoresReleaseTime'>リリース時間を無視するかどうか
-	 * （false = リリース処理を行う、ture = リリース時間を無視して即座に停止する）</param>
+	 * （False = リリース処理を行う、True = リリース時間を無視して即座に停止する）</param>
 	 * <remarks>
 	 * <para header='説明'>再生音単位で停止処理を行います。<br/>
 	 * 本関数を使用することで、プレーヤによって再生された音声を、プレーヤ単位ではなく、
@@ -164,7 +164,7 @@ public struct CriAtomExPlayback
 
 	/**
 	 * <summary>再生音のポーズ状態の取得</summary>
-	 * <returns>ポーズ中かどうか（false = ポーズされていない、true = ポーズ中）</returns>
+	 * <returns>ポーズ中かどうか（False = ポーズされていない、True = ポーズ中）</returns>
 	 * <remarks>
 	 * <para header='説明'>再生中の音声がポーズ中かどうかを返します。<br/></para>
 	 * </remarks>
@@ -178,7 +178,7 @@ public struct CriAtomExPlayback
 	/**
 	 * <summary>再生音のフォーマット情報の取得</summary>
 	 * <param name='info'>フォーマット情報</param>
-	 * <returns>情報が取得できたかどうか（ true = 取得できた、 false = 取得できなかった）</returns>
+	 * <returns>情報が取得できたかどうか（ True = 取得できた、 False = 取得できなかった）</returns>
 	 * <remarks>
 	 * <para header='説明'>CriWare.CriAtomExPlayer::Start 関数で再生された音声のフォーマット情報を取得します。<br/>
 	 * <br/>
@@ -337,7 +337,7 @@ public struct CriAtomExPlayback
 	 * <summary>再生サンプル数の取得</summary>
 	 * <param name='numSamples'>再生済みサンプル数</param>
 	 * <param name='samplingRate'>サンプリングレート</param>
-	 * <returns>サンプル数が取得できたかどうか（ true = 取得できた、 false = 取得できなかった）</returns>
+	 * <returns>サンプル数が取得できたかどうか（ True = 取得できた、 False = 取得できなかった）</returns>
 	 * <remarks>
 	 * <para header='説明'>CriWare.CriAtomExPlayer::Start 関数で再生された音声の再生サンプル数、
 	 * およびサンプリングレートを返します。<br/>

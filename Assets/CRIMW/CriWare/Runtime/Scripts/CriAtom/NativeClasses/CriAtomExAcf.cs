@@ -195,6 +195,12 @@ public class CriAtomExAcf
         public ushort busNo;                    /**< セッティング内DSPバス番号 */
         public byte numFxes;                    /**< DSP FX数 */
         public byte numBusLinks;                /**< DSPバスリンク数 */
+        /// <summaryスピーカーマッピング></summary>
+        public CriAtom.SpeakerMapping speakerMapping;
+        /// <summary>出力タイプ</summary>
+        public CriAtomExAcf.DspBusOutputType outputType;
+        /// <summary>出力オプション</summary>
+        public Byte outputOptions;
 
 		/**
 		 * <summary>名前</summary>
@@ -203,6 +209,34 @@ public class CriAtomExAcf
 			return Marshal.PtrToStringAnsi(namePointer);
 		} }
     }
+
+    /// <summary>バス出力タイプ </summary>
+    /// <remarks>
+    /// <para header='説明'>
+    /// ツールで設定したバスの出力タイプです。
+    ///  パッド出力や個人出力は、プラットフォーム機能に依存します。
+    ///  対応状況については、各種プラットフォーム向けのマニュアルを参照してください。
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="CriAtomExAcf.DspBusInfo"/>
+    public enum DspBusOutputType
+    {
+        /// <summary>ルーティングバス</summary>
+        None = 0,
+        /// <summary>メインスピーカー出力</summary>
+        Main = 1,
+        /// <summary>メインパススルー出力</summary>
+        MainPassthrough = 2,
+        /// <summary>パッド音声振動出力</summary>
+        PadHaptic = 3,
+        /// <summary>パッドスピーカー出力</summary>
+        PadSpeaker = 4,
+        /// <summary>個人出力</summary>
+        Personal = 5,
+        /// <summary>個人出力パススルー</summary>
+        PersonalPassthrough = 6,
+    }
+
 
     /**
 	 * <summary>DSPバスリンクタイプ</summary>
@@ -282,7 +316,7 @@ public class CriAtomExAcf
     }
 
     /**
-	 * <summary>Aisacタイプ</summary>
+	 * <summary>AISACタイプ</summary>
 	 * <seealso cref='CriAtomExAcf::GlobalAisacInfo'/>
 	 */
     public enum AcfAisacType : uint
@@ -292,9 +326,9 @@ public class CriAtomExAcf
     }
 
     /**
-	 * <summary>Aisac情報取得用構造体</summary>
+	 * <summary>AISAC情報取得用構造体</summary>
 	 * <remarks>
-	 * <para header='説明'>Global Aisac情報を取得するための構造体です。<br/>
+	 * <para header='説明'>Global AISAC情報を取得するための構造体です。<br/>
 	 * CriAtomExAcf::GetGlobalAisacInfo 関数に引数として渡します。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExAcf::GetGlobalAisacInfo'/>
@@ -303,10 +337,10 @@ public class CriAtomExAcf
     public struct GlobalAisacInfo
     {
         [MarshalAs(UnmanagedType.LPStr)]
-        public string name;             /**< Global Aisac名 */
+        public string name;             /**< Global AISAC名 */
         public ushort index;            /**< データインデックス */
         public ushort numGraphs;        /**< グラフ数 */
-        public AcfAisacType type;       /**< Aisacタイプ */
+        public AcfAisacType type;       /**< AISACタイプ */
         public float randomRange;       /**< ランダムレンジ */
         public ushort controlId;        /**< Control Id */
         public ushort dummy;            /**< 未使用 */
@@ -337,7 +371,7 @@ public class CriAtomExAcf
     }
 
     /**
-	 * <summary>Aisacグラフタイプ</summary>
+	 * <summary>AISACグラフタイプ</summary>
 	 * <seealso cref='CriAtomExAcf::AisacGraphInfo'/>
 	 */
     public enum AisacGraphType : int
@@ -398,7 +432,7 @@ public class CriAtomExAcf
     }
 
     /**
-	 * <summary>Aisac Graph情報取得用構造体</summary>
+	 * <summary>AISAC Graph情報取得用構造体</summary>
 	 * <remarks>
 	 * <para header='説明'>Global Aisac Graph情報を取得するための構造体です。<br/>
 	 * CriWare.CriAtomExAcf::GetGlobalAisacGraphInfo 関数に引数として渡します。<br/></para>
@@ -587,10 +621,10 @@ public class CriAtomExAcf
      * <summary>AISACコントロール情報の取得</summary>
      * <param name='index'>AISACコントロールインデックス</param>
      * <param name='info'>AISACコントロール情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>AISACコントロールインデックスからAISACコントロール情報を取得します。<br/>
-	 * 指定したインデックスのAISACコントロールが存在しない場合、FALSEが返ります。</para>
+	 * 指定したインデックスのAISACコントロールが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetAisacControlInfo(ushort index, out CriAtomEx.AisacControlInfo info)
@@ -669,10 +703,10 @@ public class CriAtomExAcf
      * <summary>DSPバス設定情報の取得</summary>
      * <param name='name'>セッティング名</param>
      * <param name='info'>セッティング情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>セッティング名を指定してセッティング情報を取得します。<br/>
-	 * 指定したセッティング名のDsp settingが存在しない場合、FALSEが返ります。<br/></para>
+	 * 指定したセッティング名のDSP settingが存在しない場合、Falseが返ります。<br/></para>
      * </remarks>
      */
     public static bool GetDspSettingInformation(string name, out AcfDspSettingInfo info)
@@ -689,7 +723,7 @@ public class CriAtomExAcf
      * <summary>DSPバス設定スナップショット情報の取得</summary>
      * <param name='index'>スナップショットインデックス</param>
      * <param name='info'>スナップショット情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>スナップショットインデックスを指定してスナップショット情報を取得します。<br/>
 	 * 指定したセッティング名のスナップショットが存在しない場合、FALSEが返ります。<br/>
@@ -711,10 +745,10 @@ public class CriAtomExAcf
      * <summary>DSPバスの取得</summary>
      * <param name='index'>バスインデックス</param>
      * <param name='info'>バス情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>インデックスを指定してDSPバス情報を取得します。<br/>
-	 * 指定したインデックス名のDSPバスが存在しない場合、FALSEが返ります。<br/></para>
+	 * Returns False if there is no DSP bus with the specified index name.<br/></para>
      * </remarks>
      */
     public static bool GetDspBusInformation(ushort index, out AcfDspBusInfo info)
@@ -726,10 +760,10 @@ public class CriAtomExAcf
      * <summary>DSPバスリンクの取得</summary>
      * <param name='index'>DSPバスリンクインデックス</param>
      * <param name='info'>DSPバスリンク情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>インデックスを指定してバスリンク情報を取得します。<br/>
-	 * 指定したインデックス名のDSPバスリンクが存在しない場合、FALSEが返ります。<br/></para>
+	 * 指定したインデックス名のDSPバスリンクが存在しない場合、Falseが返ります。<br/></para>
      * </remarks>
      */
     public static bool GetDspBusLinkInformation(ushort index, out AcfDspBusLinkInfo info)
@@ -770,10 +804,10 @@ public class CriAtomExAcf
      * <summary>カテゴリ情報の取得（インデックス指定）</summary>
      * <param name='index'>カテゴリインデックス</param>
      * <param name='info'>カテゴリ情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>カテゴリインデックスからカテゴリ情報を取得します。<br/>
-	 * 指定したインデックスのカテゴリが存在しない場合、FALSEが返ります。</para>
+	 * 指定したインデックスのカテゴリが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetCategoryInfoByIndex(ushort index, out CategoryInfo info)
@@ -790,10 +824,10 @@ public class CriAtomExAcf
      * <summary>カテゴリ情報の取得（カテゴリ名指定）</summary>
      * <param name='name'>カテゴリ名指定</param>
      * <param name='info'>カテゴリ情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>カテゴリ名からカテゴリ情報を取得します。<br/>
-	 * 指定したカテゴリ名のカテゴリが存在しない場合、FALSEが返ります。</para>
+	 * 指定したカテゴリ名のカテゴリが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetCategoryInfoByName(string name, out CategoryInfo info)
@@ -810,10 +844,10 @@ public class CriAtomExAcf
      * <summary>カテゴリ情報の取得（カテゴリID指定）</summary>
      * <param name='id'>カテゴリID</param>
      * <param name='info'>カテゴリ情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>カテゴリIDからカテゴリ情報を取得します。<br/>
-	 * 指定したカテゴリIDのカテゴリが存在しない場合、FALSEが返ります。</para>
+	 * 指定したカテゴリIDのカテゴリが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetCategoryInfoById(uint id, out CategoryInfo info)
@@ -827,10 +861,10 @@ public class CriAtomExAcf
     }
 
     /**
-     * <summary>Global Aisac数の取得</summary>
-     * <returns>Global Aisac数</returns>
+     * <summary>Global AISAC数の取得</summary>
+     * <returns>Global AISAC数</returns>
      * <remarks>
-     * <para header='説明'>登録されたACFに含まれるGlobal Aisacの数を取得します。</para>
+     * <para header='説明'>登録されたACFに含まれるGlobal AISACの数を取得します。</para>
      * </remarks>
      */
     public static int GetNumGlobalAisacs()
@@ -839,13 +873,13 @@ public class CriAtomExAcf
     }
 
     /**
-     * <summary>Global Aisac情報の取得（インデックス指定）</summary>
-     * <param name='index'>Global Aisacインデックス</param>
-     * <param name='info'>Global Aisac情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <summary>Global AISAC情報の取得（インデックス指定）</summary>
+     * <param name='index'>Global AISACインデックス</param>
+     * <param name='info'>Global AISAC情報</param>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
-     * <para header='説明'>Global AisacインデックスからAisac情報を取得します。<br/>
-	 * 指定したインデックスのGlobal Aisacが存在しない場合、FALSEが返ります。</para>
+     * <para header='説明'>Global AISACインデックスからAISAC情報を取得します。<br/>
+	 * 指定したインデックスのGlobal AISACが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetGlobalAisacInfoByIndex(ushort index, out GlobalAisacInfo info)
@@ -859,13 +893,13 @@ public class CriAtomExAcf
     }
 
     /**
-     * <summary>Global Aisac情報の取得（名前指定）</summary>
-     * <param name='name'>Global Aisac名</param>
-     * <param name='info'>Global Aisac情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <summary>Global AISAC情報の取得（名前指定）</summary>
+     * <param name='name'>Global AISAC名</param>
+     * <param name='info'>Global AISAC情報</param>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
-     * <para header='説明'>Global Aisac名からAisac情報を取得します。<br/>
-	 * 指定した名前のGlobal Aisacが存在しない場合、FALSEが返ります。</para>
+     * <para header='説明'>Global AISAC名からAISAC情報を取得します。<br/>
+	 * 指定した名前のGlobal AISACが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetGlobalAisacInfoByName(string name, out GlobalAisacInfo info)
@@ -879,14 +913,14 @@ public class CriAtomExAcf
     }
 
     /**
-     * <summary>Global Aisac Graph情報の取得</summary>
-     * <param name='aisacInfo'>Global Aisac情報</param>
-     * <param name='graphIndex'>Global Aisac graphインデックス</param>
-     * <param name='graphInfo'>Aisac graph情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <summary>Global AISAC Graph情報の取得</summary>
+     * <param name='aisacInfo'>Global AISAC情報</param>
+     * <param name='graphIndex'>Global AISAC graphインデックス</param>
+     * <param name='graphInfo'>AISAC graph情報</param>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
-     * <para header='説明'>Global Aisac情報とgraphインデックスからgraph情報を取得します。<br/>
-	 * 指定したインデックスのGlobal Aisacが存在しない場合、FALSEが返ります。</para>
+     * <para header='説明'>Global AISAC情報とgraphインデックスからgraph情報を取得します。<br/>
+	 * 指定したインデックスのGlobal AISACが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetGlobalAisacGraphInfo(GlobalAisacInfo aisacInfo, ushort graphIndex, out AisacGraphInfo graphInfo)
@@ -904,15 +938,15 @@ public class CriAtomExAcf
     }
 
     /**
-     * <summary>Global Aisac値の取得</summary>
-     * <param name='aisacInfo'>Global Aisac情報</param>
+     * <summary>Global AISAC値の取得</summary>
+     * <param name='aisacInfo'>Global AISAC情報</param>
      * <param name='control'>AISACコントロール値</param>
      * <param name='type'>グラフタイプ</param>
      * <param name='value'>AISAC値</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
-     * <para header='説明'>Global Aisac情報、コントロール値、グラフタイプを指定してAisac値を取得します。<br/>
-	 * 指定したインデックスのGlobal Aisacが存在しない場合やグラフが存在しない場合は、FALSEが返ります。</para>
+     * <para header='説明'>Global AISAC情報、コントロール値、グラフタイプを指定してAISAC値を取得します。<br/>
+	 * 指定したインデックスのGlobal AISACが存在しない場合やグラフが存在しない場合は、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetGlobalAisacValue(GlobalAisacInfo aisacInfo, float control, AisacGraphType type, out float value)
@@ -927,10 +961,10 @@ public class CriAtomExAcf
     /**
      * <summary>ACF情報の取得</summary>
      * <param name='acfInfo'>ACF情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>ライブラリに登録されたACFデータの各種情報を取得します。<br/>
-	 * ACF情報の取得に失敗した場合、FALSEが返ります。</para>
+	 * ACF情報の取得に失敗した場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetAcfInfo(out AcfInfo acfInfo)
@@ -959,10 +993,10 @@ public class CriAtomExAcf
      * <summary>セレクタ情報の取得（インデックス指定）</summary>
      * <param name='index'>セレクタインデックス</param>
      * <param name='info'>セレクタ情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>セレクタインデックスからセレクタ情報を取得します。<br/>
-	 * 指定したインデックスのセレクタが存在しない場合、FALSEが返ります。</para>
+	 * 指定したインデックスのセレクタが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetSelectorInfoByIndex(ushort index, out SelectorInfo info)
@@ -979,10 +1013,10 @@ public class CriAtomExAcf
      * <summary>セレクタ情報の取得（名前指定）</summary>
      * <param name='name'>セレクタ名</param>
      * <param name='info'>セレクタ情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>セレクタ名からセレクタ情報を取得します。<br/>
-	 * 指定した名前のセレクタが存在しない場合、FALSEが返ります。</para>
+	 * 指定した名前のセレクタが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetSelectorInfoByName(string name, out SelectorInfo info)
@@ -1000,10 +1034,10 @@ public class CriAtomExAcf
      * <param name='selectorInfo'>セレクタ情報</param>
      * <param name='labelIndex'>ラベルインデックス</param>
      * <param name='info'>セレクタラベル情報</param>
-     * <returns>情報が取得できたかどうか？（取得できた：TRUE／取得できない：FALSE）</returns>
+     * <returns>情報が取得できたかどうか？（取得できた：True／取得できない：False）</returns>
      * <remarks>
      * <para header='説明'>セレクタ情報とセレクタラベルインデックスからセレクタラベル情報を取得します。<br/>
-	 * 指定したインデックスのセレクタラベルが存在しない場合、FALSEが返ります。</para>
+	 * 指定したインデックスのセレクタラベルが存在しない場合、Falseが返ります。</para>
      * </remarks>
      */
     public static bool GetSelectorLabelInfo(SelectorInfo selectorInfo, ushort labelIndex, out SelectorLabelInfo info)

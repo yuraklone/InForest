@@ -65,20 +65,20 @@ public class BGMController : MonoBehaviour
             {
                 bgmSource.cueName = inGameBGMName;
             }
-            bgmPlayer.AttachFader();
-            bgmPlayer.SetFadeInTime(fadeInTime);
+            //bgmPlayer.AttachFader();
+            //bgmPlayer.SetFadeInTime(fadeInTime);
             bgmSource.Play();
-            Invoke("DetachFader", (fadeInTime / 1000) + 0.5f);
+            //Invoke("DetachFader", (fadeInTime / 1000) + 0.5f);
             
         }
     }
 
     public void StopBgm()
     {
-        bgmPlayer.AttachFader();
-        bgmPlayer.SetFadeOutTime(fadeOutTime);
+        //bgmPlayer.AttachFader();
+        //bgmPlayer.SetFadeOutTime(fadeOutTime);
         bgmSource.Stop();
-        Invoke("DetachFader", (fadeInTime / 1000) + 0.5f);
+        //Invoke("DetachFader", (fadeInTime / 1000) + 0.5f);
 
     }
 

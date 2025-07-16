@@ -536,6 +536,9 @@ public static class CriAtomExAcfDebug
 		public ushort busNo;
 		public byte numFxes;
 		public byte numBusLinks;
+		public CriAtom.SpeakerMapping speakerMapping;
+        public CriAtomExAcf.DspBusOutputType outputType;
+        public Byte outputOptions;
 
 		public void Convert (out DspBusInfo x)
 		{

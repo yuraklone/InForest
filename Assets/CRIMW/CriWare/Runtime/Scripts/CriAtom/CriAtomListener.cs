@@ -65,7 +65,7 @@ public class CriAtomListener : CriMonoBehaviour
 	/**
 	 * <summary>CriAtomListenerがアクティブであるか</summary>
 	 * <remarks>
-	 * <para header='説明'>CriAtomListenrがアクティブである場合、CriAtomSourceによる音声のリスナーとして機能します。 <br/>
+	 * <para header='説明'>CriAtomListenerがアクティブである場合、CriAtomSourceによる音声のリスナーとして機能します。 <br/>
 	 * CriAtomListenerが複数ある場合は、アクティブなリスナーのうち <br/>
 	 * CriAtomSourceから最も近いリスナーを用いて3Dサウンドが計算されます。</para>
 	 * </remarks>

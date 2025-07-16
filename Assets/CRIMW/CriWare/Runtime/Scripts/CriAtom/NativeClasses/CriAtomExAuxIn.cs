@@ -298,7 +298,7 @@ public class CriAtomExAuxIn : CriDisposable
 	/**
 	 * <summary>バスセンドレベル設定</summary>
 	 * <param name='busName'>バス名</param>
-	 * <param name='level'>レベル値（0.0f?1.0f）</param>
+	 * <param name='level'>レベル値（0.0f~1.0f）</param>
 	 * <remarks>
 	 * <para header='説明'>AuxInの音声のバスセンドレベルを設定します。<br/>
 	 * バスセンドレベルは、音声をどのバスにどれだけ流すかを指定するための仕組みです。<br/>

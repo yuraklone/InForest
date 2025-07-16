@@ -60,6 +60,14 @@ public static class CriFsPlugin
 
 		/* ライブラリの初期化 */
 		CriFsPlugin.criFsUnity_Initialize();
+#if !UNITY_EDITOR && UNITY_ANDROID
+		using (var UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+        {
+            AndroidJavaObject activityContext = UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+			IntPtr rawActivityContextObj = activityContext.GetRawObject();
+			criFs_EnableAssetsAccess_ANDROID(IntPtr.Zero, rawActivityContextObj); 
+        }
+#endif
 	}
 
 	public static bool IsLibraryInitialized()
@@ -90,6 +98,9 @@ public static class CriFsPlugin
 
 		/* ライブラリの終了 */
 		CriFsPlugin.criFsUnity_Finalize();
+#if !UNITY_EDITOR && UNITY_ANDROID
+		criFs_DisableAssetsAccess_ANDROID();
+#endif
 	}
 
 	#region DLL Import
@@ -98,7 +109,7 @@ public static class CriFsPlugin
 		int num_loaders, int num_binders, int num_installers, int max_path, bool minimize_file_descriptor_usage, bool dummy_flag);
 
 
-[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criFsUnity_Initialize();
 
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
@@ -113,6 +124,11 @@ public static class CriFsPlugin
 	#if !UNITY_EDITOR && UNITY_ANDROID
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criFsUnity_SetConfigAdditionalParameters_ANDROID(int device_read_bps);
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern void criFs_EnableAssetsAccess_ANDROID(IntPtr javaVM, IntPtr staticActivityContext);
+
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern void criFs_DisableAssetsAccess_ANDROID();
 	#endif
 	#endregion
 }
@@ -140,6 +156,7 @@ public static class CriManaPlugin
 	}
 	public static void UseLegacyDecoder_PC(bool flag){}
 	public static void UseStreamerManager(bool flag){}
+	public static bool isInitialized => false;
 };
 
 

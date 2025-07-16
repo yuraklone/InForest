@@ -70,7 +70,7 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 		 * <summary>スペクトラムアナライザを有効にするか</summary>
 		 * <remarks>
 		 * <para header='説明'>スペクトラムアナライザを有効化します。
-		 * 機能を利用する場合、本フラグにtrueを指定すると同時に、
+		 * 機能を利用する場合、本フラグにTrueを指定すると同時に、
 		 * numSpectrumAnalyzerBandsにMaximumSpectrumBands以下の正数を
 		 * 指定してください。</para>
 		 * </remarks>
@@ -81,7 +81,7 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 		 * <summary>波形データ取得を有効にするか</summary>
 		 * <remarks>
 		 * <para header='説明'>出力データの取得を有効化します。
-		 * 機能を利用する場合、本フラグにtrueを指定すると同時に、
+		 * 機能を利用する場合、本フラグにTrueを指定すると同時に、
 		 * numCapturedPcmSamplesに正数を指定してください。</para>
 		 * </remarks>
 		 */
@@ -91,7 +91,7 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 		 * <summary>波形データ取得コールバックを有効にするか</summary>
 		 * <remarks>
 		 * <para header='説明'>出力データ取得用のコールバックを有効化します。<br/>
-		 * 機能を利用する場合、本フラグにtrueを指定した上で、MonoBehaviour.Update 内等で
+		 * 機能を利用する場合、本フラグにTrueを指定した上で、MonoBehaviour.Update 内等で
 		 * 定期的に ExecutePcmCaptureCallback を呼び出してください。<br/></para>
 		 * </remarks>
 		 */
@@ -176,16 +176,14 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 
 	/**
 	 * <summary>AtomExプレーヤのアタッチ</summary>
-	 * <returns>アタッチが成功したかどうか（成功：true、失敗：false）</returns>
+	 * <returns>アタッチが成功したかどうか（成功：True、失敗：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>出力データ解析を行うAtomExプレーヤをアタッチします。<br/>
 	 * 複数のAtomExプレーヤをアタッチすることは出来ません。
 	 * アタッチ中に別のAtomExプレーヤをアタッチした場合、アタッチ中のAtomExプレーヤはデタッチされます。<br/>
 	 * <br/>
 	 * CriAtomSourceをアタッチする場合、CriAtomSource::AttachToOutputAnalyzerを使用してください。</para>
-	 * <para header='注意'>アタッチは再生開始前に行う必要があります。再生開始後のアタッチは失敗します。<br/>
-	 * <br/>
-	 * 本関数でアタッチしたAtomExプレーヤをデタッチする前に破棄した場合、
+	 * <para header='注意'>本関数でアタッチしたAtomExプレーヤをデタッチする前に破棄した場合、
 	 * デタッチ時にアクセス違反が発生します。<br/>
 	 * 必ず先にデタッチを行ってからAtomExプレーヤを破棄してください。<br/></para>
 	 * </remarks>
@@ -203,12 +201,6 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 		this.DetachExPlayer();
 		this.DetachDspBus();
 
-		/* プレーヤの状態をチェック */
-		CriAtomExPlayer.Status status = player.GetStatus();
-		if (status != CriAtomExPlayer.Status.Stop) {
-			return false;
-		}
-
 		criAtomExOutputAnalyzer_AttachExPlayer(this.handle, player.nativeHandle);
 		this.player = player;
 
@@ -220,10 +212,7 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 	 * <remarks>
 	 * <para header='説明'>出力データ解析を行うAtomExプレーヤをデタッチします。<br/>
 	 * デタッチを行うと、以降の解析処理は行われなくなります。</para>
-	 * <para header='注意'>アタッチ済みのプレーヤが音声を再生している状態で本関数を呼び出した場合、
-	 * 強制的に再生を停止した上でデタッチが行われます。<br/>
-	 * <br/>
-	 * アタッチしたAtomExプレーヤが既に破棄されていた場合はアクセス違反が発生します。<br/>
+	 * <para header='注意'>アタッチしたAtomExプレーヤが既に破棄されていた場合はアクセス違反が発生します。<br/>
 	 * 必ず本関数、またはCriAtomExOutputAnalyzer::Disposeを呼び出してから、
 	 * AtomExプレーヤを破棄するようにしてください。<br/></para>
 	 * </remarks>
@@ -237,20 +226,13 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 			return;
 		}
 
-		CriAtomExPlayer.Status status = this.player.GetStatus();
-		if (status != CriAtomExPlayer.Status.Stop) {
-			/* 音声再生中にデタッチは行えないため、強制的に停止 */
-			Debug.LogWarning("[CRIWARE] Warning: CriAtomExPlayer is forced to stop for detaching CriAtomExOutputAnalyzer.");
-			this.player.StopWithoutReleaseTime();
-		}
-
 		criAtomExOutputAnalyzer_DetachExPlayer(this.handle, this.player.nativeHandle);
 		this.player = null;
 	}
 
 	/**
 	 * <summary>DSPバスのアタッチ</summary>
-	 * <returns>アタッチが成功したかどうか（成功：true、失敗：false）</returns>
+	 * <returns>アタッチが成功したかどうか（成功：True、失敗：False）</returns>
 	 * <remarks>
 	 * <para header='説明'>出力データ解析を行うDSPバスをアタッチします。<br/>
 	 * 複数のDSPバスをアタッチすることは出来ません。
@@ -303,7 +285,7 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 	 * <returns>RMSレベル</returns>
 	 * <remarks>
 	 * <para header='説明'>アタッチ中の音声出力のRMSレベルを取得します。<br/>
-	 * 本機能を利用する場合、ConfigのenableLevelmeterにtrueを指定してモジュールを作成してください。</para>
+	 * 本機能を利用する場合、ConfigのenableLevelmeterにTrueを指定してモジュールを作成してください。</para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExOutputAnalyzer::AttachExPlayer'/>
 	 * <seealso cref='CriAtomExOutputAnalyzer::AttachDspBus'/>
@@ -331,7 +313,7 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 	 * <remarks>
 	 * <para header='説明'>スペクトラムアナライザによって解析された帯域ごとの振幅値を取得します。<br/>
 	 * 配列の要素数はモジュールの作成時に指定したバンド数です。<br/>
-	 * 本機能を利用する場合、ConfigのenableSpectrumAnalyzerにtrueを、numSpectrumAnalyzerBandsに
+	 * 本機能を利用する場合、ConfigのenableSpectrumAnalyzerにTrueを、numSpectrumAnalyzerBandsに
 	 * MaximumSpectrumBands以下の正数を指定してモジュールを作成してください。
 	 * 解析結果を市販のスペクトルアナライザのように表示させたい場合、
 	 * 本関数が返す値をデシベル値に変換する必要があります。<br/></para>
@@ -379,7 +361,7 @@ public class CriAtomExOutputAnalyzer : CriDisposable
 	 * <param name='ch'>チャンネル</param>
 	 * <remarks>
 	 * <para header='説明'>アタッチ中の音声出力の波形データを取得します。<br/>
-	 * 本機能を利用する場合、ConfigのenablePcmCaptureにtrueを、numCapturedPcmSamplesに
+	 * 本機能を利用する場合、ConfigのenablePcmCaptureにTrueを、numCapturedPcmSamplesに
 	 * 正数を指定してモジュールを作成してください。<br/></para>
 	 * <para header='注意'>引数の配列の長さが十分でない場合、関数内で配列の確保が行われます。<br/>
 	 * 不要なGCの発生を避けるため、初期化コンフィグで指定したデータサンプル数以上の

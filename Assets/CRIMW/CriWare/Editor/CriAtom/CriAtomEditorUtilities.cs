@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
  *
  * Copyright (c) 2021 CRI Middleware Co., Ltd.
  *
@@ -48,8 +48,6 @@ namespace CriWare.Editor {
  */
 public class CriAtomEditorUtilities
 {
-	private static BuildTarget lastBuildTarget = BuildTarget.NoTarget;
-
 	/**
 	 * <summary>エディタでCRI Atomライブラリ初期化</summary>
 	 * <returns>初期化処理が実行されたか</returns>
@@ -62,8 +60,9 @@ public class CriAtomEditorUtilities
 	 * </remarks>
 	 */
 	public static bool InitializeLibrary() {
-		bool settingChanged = CriAtomEditorSettings.Instance.GetChangeStatusOnce();
-		settingChanged = settingChanged || lastBuildTarget != EditorUserBuildSettings.activeBuildTarget;
+		if(EditorApplication.isPlayingOrWillChangePlaymode) { return false; }
+
+		bool settingChanged = CriAtomEditorSettings.Instance.GetChangeStatusOnce() || CriCommonEditorSettings.Instance.GetChangeStatusOnce();
 		if (CriAtomPlugin.IsLibraryInitialized() && settingChanged == false) {
 			return false;
 		}
@@ -71,28 +70,39 @@ public class CriAtomEditorUtilities
 			CriAtomPlugin.FinalizeLibrary();
 		}
 		
-		CriFsConfig fsConfigEditor = new CriFsConfig();
+		CriFsConfig fsConfigEditor = CriCommonEditorSettings.Instance.FsConfig;
 		CriAtomConfig atomConfigEditor = CriAtomEditorSettings.Instance.AtomConfig;
 		if (CriAtomEditorSettings.Instance.TrySceneSettings == true) {
-			CriWareInitializer criInitializer = GameObject.FindObjectOfType<CriWareInitializer>();
+			CriWareInitializer criInitializer = null;
+#if UNITY_2023_1_OR_NEWER
+			criInitializer = GameObject.FindAnyObjectByType<CriWareInitializer>();
+#else
+			criInitializer = GameObject.FindObjectOfType<CriWareInitializer>();
+#endif
 			if (criInitializer != null) {
-				fsConfigEditor = criInitializer.fileSystemConfig;
 				atomConfigEditor = criInitializer.atomConfig;
 			} else {
 				Debug.Log("[CRIWARE] Atom Preview: No CriWareInitializer component found in current scene. " +
 					"Using project settings instead.");
 			}
 		}
-
-#if UNITY_EDITOR && UNITY_WEBGL
-		CriFsPlugin.SetConfigAdditionalParameters_EDITOR(atomConfigEditor.webglWebAudioVoicePoolConfig.voices);
+		if (CriCommonEditorSettings.Instance.TryFsSceneSettings == true) {
+			CriWareInitializer criInitializer = null;
+#if UNITY_2023_1_OR_NEWER
+			criInitializer = GameObject.FindAnyObjectByType<CriWareInitializer>();
+#else
+			criInitializer = GameObject.FindObjectOfType<CriWareInitializer>();
 #endif
+			if (criInitializer != null) {
+				fsConfigEditor = criInitializer.fileSystemConfig;
+			} else {
+				Debug.Log("[CRIWARE] File System: No CriWareInitializer component found in current scene. " +
+					"Using project settings instead.");
+			}
+		}
+
 		CriWareInitializer.InitializeFileSystem(fsConfigEditor);
 		bool initRes = CriWareInitializer.InitializeAtom(atomConfigEditor);
-
-		if (initRes) {
-			lastBuildTarget = EditorUserBuildSettings.activeBuildTarget;
-		}
 
 		return initRes;
 	}

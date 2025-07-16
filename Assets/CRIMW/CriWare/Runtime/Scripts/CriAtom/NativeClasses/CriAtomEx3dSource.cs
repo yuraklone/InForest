@@ -423,10 +423,10 @@ public class CriAtomEx3dSource : CriDisposable
 
 	/**
 	 * <summary>距離減衰の設定</summary>
-	 * <param name='flag'>距離減衰を有効にするか(true: 有効、false: 無効)</param>
+	 * <param name='flag'>距離減衰を有効にするか(True: 有効、False: 無効)</param>
 	 * <remarks>
 	 * <para header='説明'>距離減衰による音量の変動を有効にするか無効にするかを設定します。<br/>
-	 * デフォルト値は true （有効）です。<br/></para>
+	 * デフォルト値は True （有効）です。<br/></para>
 	 * <para header='注意'>設定したパラメータを実際に適用するには、 CriWare.CriAtomEx3dSource::Update 関数を呼び出す必要があります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomEx3dSource::Update'/>
@@ -439,10 +439,10 @@ public class CriAtomEx3dSource : CriDisposable
 
 	/**
 	 * <summary>距離減衰設定の取得</summary>
-	 * <returns>距離減衰設定(true: 有効、false: 無効)</returns>
+	 * <returns>距離減衰設定(True: 有効、False: 無効)</returns>
 	 * <remarks>
 	 * <para header='説明'>距離減衰による音量の変動が有効か無効かを取得します。<br/>
-	 * デフォルト値は true （有効）です。<br/></para>
+	 * デフォルト値は True （有効）です。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomEx3dSource::SetAttenuationDistanceSetting'/>
 	 */

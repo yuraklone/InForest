@@ -43,10 +43,16 @@ public sealed class CriWareVersionWindow : EditorWindow
 	private readonly string[][] vp9BinaryFilenames = {
 	};
 
+	private readonly string[][] av1BinaryFilenames = {
+	};
+
 	private readonly string[][] SoundxrBinaryFilenames = {
 	};
 	
 	private readonly string[][] rtcBinaryFilenames = {
+	}; 
+		
+	private readonly string[][] clovisBinaryFilenames = {
 	};
 
 
@@ -56,8 +62,10 @@ public sealed class CriWareVersionWindow : EditorWindow
 		LIPS,
 		MCDSP,
 		VP9,
+		AV1,
 		SOUNDXR,
-		Rtc
+		Rtc,
+		Clovis
 	}
 	static readonly PluginType[] moduleEnumList = (PluginType[])Enum.GetValues(typeof(PluginType));
 
@@ -66,8 +74,10 @@ public sealed class CriWareVersionWindow : EditorWindow
 		"LipSync",
 		"McDSP",
 		"VP9",
+		"AV1",
 		"Sound xR",
-		"Rtc"
+		"Rtc",
+		"Clovis"
 	};
 
 	[Serializable]
@@ -109,9 +119,11 @@ public sealed class CriWareVersionWindow : EditorWindow
 		{PluginType.LIPS, false},
 		{PluginType.MCDSP, false},
 		{PluginType.VP9, false},
+		{PluginType.AV1, false},
 		{PluginType.SOUNDXR, false},
 		{PluginType.Rtc, false},
-	};
+        {PluginType.Clovis, false},
+    };
 
 	/* GUI用スタイル定義 */
 	private readonly GUILayoutOption platformColumnWidth  = GUILayout.Width(80);
@@ -121,6 +133,7 @@ public sealed class CriWareVersionWindow : EditorWindow
 	private readonly GUILayoutOption appendixColumnWidth  = GUILayout.Width(200);
 	private readonly GUILayoutOption moduleSelectorWidth  = GUILayout.Width(100);
 	private readonly GUILayoutOption[] pathColumnWidth    = {GUILayout.MinWidth(400), GUILayout.ExpandWidth(true)};
+	private static Color selectedTint = Color.yellow;
 
 	/* 詳細バージョン表示用等幅フォント定義 */
 	static private Font _detailFont;
@@ -164,8 +177,10 @@ public sealed class CriWareVersionWindow : EditorWindow
 				case PluginType.LIPS: { assembly = Assembly.Load("CriMw.CriWare.Adxlipsync.Runtime"); break; }
 				case PluginType.MCDSP: { assembly = Assembly.Load("CriMw.CriWare.Mcdsp.Runtime"); break; }
 				case PluginType.VP9: { assembly = Assembly.Load("CriMw.CriWare.Vp9.Runtime"); break; }
+				case PluginType.AV1: { assembly = Assembly.Load("CriMw.CriWare.AV1.Runtime"); break; }
 				case PluginType.SOUNDXR: { assembly = Assembly.Load("CriMw.CriWare.CriSoundxR.Runtime"); break; }
 				case PluginType.Rtc: { assembly = Assembly.Load("CriMw.CriWare.Telexus.Runtime"); break; }
+				case PluginType.Clovis: { assembly = Assembly.Load("CriMw.CriWare.Clovis.Runtime"); break; }
 				default: break;
 			}
 		} catch {
@@ -187,8 +202,10 @@ public sealed class CriWareVersionWindow : EditorWindow
 				case PluginType.LIPS: return (string)assembly.GetType(asmDefSupport ? "CriWare.CriLipsPlugin" : "CriLipsPlugin").GetField("scriptVersionString", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
 				case PluginType.MCDSP: return (string)assembly.GetType(asmDefSupport ? "CriWare.CriAfxMcDspInitializer" : "CriAfxMcDspInitializer").GetField("scriptVersionString", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
 				case PluginType.VP9: return (string)assembly.GetType(asmDefSupport ? "CriWare.CriManaVp9" : "CriManaVp9").GetField("scriptVersionString", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+				case PluginType.AV1: return (string)assembly.GetType(asmDefSupport ? "CriWare.CriManaAV1" : "CriManaAV1").GetField("scriptVersionString", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
 				case PluginType.SOUNDXR: return (string)assembly.GetType(asmDefSupport ? "CriWare.CriSoundxR" : "CriSoundxR").GetField("scriptVersionString", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
 				case PluginType.Rtc: return (string)assembly.GetType(asmDefSupport ? "CriWare.CriRtcPlugin" : "CriRtcPlugin").GetField("scriptVersionString", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+				case PluginType.Clovis: return (string)assembly.GetType(asmDefSupport ? "CriWare.CriVipPlugin" : "CriVipPlugin").GetField("scriptVersionString", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
 				default: return null;
 			}
 		} catch {
@@ -209,8 +226,10 @@ public sealed class CriWareVersionWindow : EditorWindow
 			case PluginType.LIPS: return "t:DefaultAsset cri_lips_unity";
 			case PluginType.MCDSP: return "t:DefaultAsset criafx_mcdsp";
 			case PluginType.VP9: return "t:DefaultAsset cri_mana_vpx";
+			case PluginType.AV1: return "t:DefaultAsset cri_mana_dav1d";
 			case PluginType.SOUNDXR: return "t:DefaultAsset criafx_soundxr";
 			case PluginType.Rtc: return "t:DefaultAsset cri_rtc_unity";
+			case PluginType.Clovis: return "t:DefaultAsset cri_vip_unity";
 			default: return "t:DefaultAsset";
 		}
 	}
@@ -222,8 +241,10 @@ public sealed class CriWareVersionWindow : EditorWindow
 			case PluginType.LIPS: return lipsBinaryFilenames;
 			case PluginType.MCDSP: return mcDspBinaryFilenames;
 			case PluginType.VP9: return vp9BinaryFilenames;
+			case PluginType.AV1: return av1BinaryFilenames;
 			case PluginType.SOUNDXR: return SoundxrBinaryFilenames;
 			case PluginType.Rtc: return rtcBinaryFilenames;
+			case PluginType.Clovis: return clovisBinaryFilenames;
 			default: return null;
 		}
 	}
@@ -237,8 +258,10 @@ public sealed class CriWareVersionWindow : EditorWindow
 			case PluginType.LIPS: { searchKeyword = "CriLips"; break; }
 			case PluginType.MCDSP: { searchKeyword = "CriAfxMcDspInitializer"; break; }
 			case PluginType.VP9: { searchKeyword = "CriManaVp9"; break; }
+			case PluginType.AV1: { searchKeyword = "CriManaAV1"; break; }
 			case PluginType.SOUNDXR: { searchKeyword = "CriSoundxR"; break; }
 			case PluginType.Rtc: { searchKeyword = "CriRtcPlugin"; break; }
+			case PluginType.Clovis: { searchKeyword = "CriVipPlugin"; break; }
 			default: { searchKeyword = "CriWare"; break; }
 		}
 		string exactRegEx = "[\\/]" + searchKeyword + ".cs";
@@ -292,9 +315,15 @@ public sealed class CriWareVersionWindow : EditorWindow
 					if (!string.IsNullOrEmpty(target[4])) {
 						strPath = Path.Combine(strPath, target[4]);
 					}
+
+					/* プラットフォーム<->ライブラリペアの誤検出を排除 */
 					if (target[0] == "PC" && strPath.Contains("UWP")) {
 						continue;
 					}
+					if (target[0] == "Linux" && strPath.Contains("Android")) {
+						continue;
+					}
+					
 					result.Add(new TargetInfo(strPath, target));
 					break;
 				}
@@ -312,12 +341,15 @@ public sealed class CriWareVersionWindow : EditorWindow
 	private PluginType GUIModuleSelector(PluginType module) {
 		using (new EditorGUILayout.HorizontalScope()) {
 			var tempEnabled = GUI.enabled;
+			var tempColor = GUI.color;
 			for(int i = 0; i < moduleEnumList.Length; ++i) {
 				GUIStyle buttonStyle = (i == 0) ? EditorStyles.miniButtonLeft : (i == moduleEnumList.Length - 1) ? EditorStyles.miniButtonRight : EditorStyles.miniButtonMid;
 				GUI.enabled = doesModuleExist[moduleEnumList[i]];
+				if (module == moduleEnumList[i]) { GUI.color = selectedTint; }
 				if (GUILayout.Button(pluginTypeName[(int)moduleEnumList[i]], buttonStyle, moduleSelectorWidth)) {
 					module = moduleEnumList[i];
 				}
+				GUI.color = tempColor;
 			}
 			GUI.enabled = tempEnabled;
 		}
@@ -369,7 +401,7 @@ public sealed class CriWareVersionWindow : EditorWindow
 					EditorGUILayout.LabelField("", GUILayout.Width(15));
 					var tempColor = GUI.color;
 					if (i == selectedInfoIndex) {
-						GUI.color = Color.yellow;
+						GUI.color = selectedTint;
 					}
 					if (GUILayout.Button(pluginInfos[i].platform, EditorStyles.miniButton, platformColumnWidth)) {
 						/* 表示の制限のため表示可能な文字数で切り出す */

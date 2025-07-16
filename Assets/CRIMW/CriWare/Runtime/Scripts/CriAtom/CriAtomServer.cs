@@ -13,6 +13,11 @@ public class CriAtomServer : CriMonoBehaviour {
 
 	#region Internal Fields
 	private static CriAtomServer _instance = null;
+
+#if CRIWARE_PROFILING_CORE_1_OR_NEWER
+	private static CriWareProfilerReporter profilerReporterInstance = null;
+#endif
+
 #if UNITY_EDITOR
 	private bool isApplicationPaused = false;
 	private bool isEditorPaused = false;
@@ -23,6 +28,7 @@ public class CriAtomServer : CriMonoBehaviour {
 	public System.Action<bool> onApplicationPausePostProcess;
 	static public bool KeepPlayingSoundOnPause = true;
 	static public bool EnableAutoConsumePcmOutput = true;
+	static public bool EnableBackgroundPlayback_ANDROID = false;
 
 #if UNITY_EDITOR
 	private bool consumingPcmOutput = false;
@@ -44,12 +50,23 @@ public class CriAtomServer : CriMonoBehaviour {
 		if (_instance == null) {
 			CriWare.Common.managerObject.AddComponent<CriAtomServer>();
 		}
+
+#if CRIWARE_PROFILING_CORE_1_OR_NEWER
+		if (profilerReporterInstance == null) { 
+			profilerReporterInstance = new CriWareProfilerReporter();
+		}
+#endif
 	}
 
 	public static void DestroyInstance() {
 		if (_instance != null) {
 			UnityEngine.GameObject.Destroy(_instance);
 		}
+#if CRIWARE_PROFILING_CORE_1_OR_NEWER
+		if (profilerReporterInstance != null) { 
+			profilerReporterInstance = null;
+		}
+#endif
 	}
 
 	void Awake()
@@ -99,6 +116,11 @@ public class CriAtomServer : CriMonoBehaviour {
 		CriAtomPlugin.ExecuteQueuedBeatSyncCallbacks();
 
 		ConsumePcmOutput();
+#if CRIWARE_PROFILING_CORE_1_OR_NEWER
+		if (profilerReporterInstance != null) { 
+			profilerReporterInstance.UpdateMeasure();
+		}
+#endif
 	}
 
 	public override void CriInternalLateUpdate() { }
@@ -181,10 +203,14 @@ public class CriAtomServer : CriMonoBehaviour {
 		if (!KeepPlayingSoundOnPause) {
 			CriAtomPlugin.Pause(appPause);
 		}
+#elif UNITY_IOS
+		/* do nothing */
+#elif UNITY_ANDROID
+		if (EnableBackgroundPlayback_ANDROID == false) {
+			CriAtomPlugin.Pause(appPause);
+		}
 #else
-#if !UNITY_IOS
 		CriAtomPlugin.Pause(appPause);
-#endif
 #endif
 		if (onApplicationPausePostProcess != null) {
 			onApplicationPausePostProcess(appPause);

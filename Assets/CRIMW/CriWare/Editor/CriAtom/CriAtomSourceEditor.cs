@@ -31,7 +31,11 @@ public class CriAtomSourceEditor : CriAtomSourceBaseEditor {
 
 #if CRI_UNITY_EDITOR_PREVIEW
 		/* シーンからCriAtomコンポーネントを見つけ出す */
+#if UNITY_2023_1_OR_NEWER
+		atomComponent = (CriAtom)FindAnyObjectByType(typeof(CriAtom));
+#else
 		atomComponent = (CriAtom)FindObjectOfType(typeof(CriAtom));
+#endif
 
 		previewPlayer = new CriWare.Editor.CriAtomEditorUtilities.PreviewPlayer();
 		

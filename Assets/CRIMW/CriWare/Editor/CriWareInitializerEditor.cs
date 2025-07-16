@@ -209,6 +209,7 @@ public class CriWareInitializerEditor : UnityEditor.Editor
 						CriAtomEx.SoundRendererType.Native;
 				GenToggleField("Keep Playing Sound On Pause", "", ref initializer.atomConfig.keepPlayingSoundOnPause);
 				GenToggleField("Enable SonicSYNC", "This setting is used for platform other than Android, iOS, and Switch.", ref initializer.atomConfig.enableSonicSync);
+				GenToggleField("Enable Atom Sound Disabled Mode", "This setting is used for platforms other than Linux", ref initializer.atomConfig.enableAtomSoundDisabledMode);
 
 				showAtomStandardVoicePoolConfig = EditorGUILayout.Foldout(showAtomStandardVoicePoolConfig, "Standard Voice Pool Config");
 				if (showAtomStandardVoicePoolConfig) {
@@ -251,6 +252,7 @@ public class CriWareInitializerEditor : UnityEditor.Editor
 					}
 					EditorGUI.EndDisabledGroup();
 					GenToggleField("Override iPod Music", "", ref initializer.atomConfig.iosOverrideIPodMusic);
+					GenToggleField("Enable OS Notification Handling", "Let ADX handle iOS audio interuption notifications.", ref initializer.atomConfig.iosEnableOSNotificationHandling);
 					EditorGUI.indentLevel -= 1;
 				}
 

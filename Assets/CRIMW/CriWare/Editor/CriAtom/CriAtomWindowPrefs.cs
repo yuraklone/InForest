@@ -20,6 +20,8 @@ public class CriAtomWindowPrefs : ScriptableObject
 	public string outputAssetsRoot = string.Empty;
 	public bool showPrivateCue = false;
 
+	readonly string SettingsDirPath = "Assets/CriData/Settings";
+
 
 	static string FindInstance() {
 		var guids = AssetDatabase.FindAssets("t:" + typeof(CriAtomWindowPrefs).Name);
@@ -37,7 +39,10 @@ public class CriAtomWindowPrefs : ScriptableObject
 
 		if (string.IsNullOrEmpty(FindInstance())) {
 			var script = MonoScript.FromScriptableObject(this);
-			var prefsFilePath = Path.Combine(Path.GetDirectoryName(AssetDatabase.GetAssetPath(script)), "CriAtomWindowPrefs.asset");
+			if (!System.IO.Directory.Exists(SettingsDirPath)) {
+				System.IO.Directory.CreateDirectory(SettingsDirPath);
+			}
+			var prefsFilePath = System.IO.Path.Combine(SettingsDirPath, "CriAtomWindowPrefs.asset");
 			AssetDatabase.CreateAsset(this, prefsFilePath);
 		} else {
 			EditorUtility.SetDirty(this);

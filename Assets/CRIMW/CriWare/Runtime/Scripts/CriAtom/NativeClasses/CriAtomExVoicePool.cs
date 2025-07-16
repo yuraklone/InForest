@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
  *
  * Copyright (c) 2011 CRI Middleware Co., Ltd.
  *
@@ -51,7 +51,7 @@ public abstract class CriAtomExVoicePool : CriDisposable
 	public enum VoicePoolId
 	{
 		/* 機種共通のボイスプールID */
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_ANDROID || UNITY_IOS || UNITY_TVOS || UNITY_PS3 || UNITY_PS4 || UNITY_PS5 || UNITY_WINRT || UNITY_XBOXONE || UNITY_GAMECORE_XBOXONE || UNITY_GAMECORE_SCARLETT || UNITY_WEBGL || UNITY_SWITCH || UNITY_STADIA || UNITY_STANDALONE_LINUX
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_ANDROID || UNITY_IOS || UNITY_TVOS || UNITY_PS3 || UNITY_PS4 || UNITY_PS5 || UNITY_WINRT || UNITY_XBOXONE || UNITY_GAMECORE_XBOXONE || UNITY_GAMECORE_SCARLETT || UNITY_WEBGL || UNITY_SWITCH || UNITY_STANDALONE_LINUX || UNITY_OPENHARMONY
 		StandardMemory          = StandardMemoryAsrVoicePoolId,     /**< 機種標準のメモリ再生ボイスプールID */
 		StandardStreaming       = StandardStreamingAsrVoicePoolId,  /**< 機種標準のストリーミング再生ボイスプールID */
 #elif UNITY_PSP2
@@ -64,7 +64,7 @@ public abstract class CriAtomExVoicePool : CriDisposable
 		HcaMxStreaming          = 5,                                /**< HCA-MXストリーミング再生ボイスプールID */
 
 		/* 機種固有のボイスプールID */
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_IOS || UNITY_TVOS || UNITY_PS3 || UNITY_WINRT || UNITY_XBOXONE || UNITY_GAMECORE_XBOXONE || UNITY_GAMECORE_SCARLETT || UNITY_WEBGL || UNITY_SWITCH || UNITY_STADIA || UNITY_STANDALONE_LINUX
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_IOS || UNITY_TVOS || UNITY_PS3 || UNITY_WINRT || UNITY_XBOXONE || UNITY_GAMECORE_XBOXONE || UNITY_GAMECORE_SCARLETT || UNITY_WEBGL || UNITY_SWITCH || UNITY_STANDALONE_LINUX || UNITY_OPENHARMONY
 #elif UNITY_ANDROID
 		LowLatencyMemory        = StandardMemoryNsrVoicePoolId,     /**< [Android] 低遅延メモリ再生ボイスプールID */
 		LowLatencyStreaming     = StandardStreamingNsrVoicePoolId,  /**< [Android] 低遅延ストリーミング再生ボイスプールID */

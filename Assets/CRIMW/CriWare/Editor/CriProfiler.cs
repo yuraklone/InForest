@@ -957,14 +957,6 @@ public partial class CriProfiler
 			case TcpCommandId.CRITCP_MAIL_SEND_LOG:
 				switch (GetLogFuncId(header.function_id)) {
 					case LogFuncId.LOG_COMMAND_ExPlaybackId:
-						this.AddEventLog(data);
-						break;
-					default:
-						break;
-				}
-				break;
-			case TcpCommandId.CRITCP_MAIL_MONITOR_ATOM_EXPLAYBACKINFO_PLAY_END:
-				switch (GetLogFuncId(header.function_id)) {
 					case LogFuncId.LOG_COMMAND_ExPlaybackInfo_FreeInfo:
 						this.AddEventLog(data);
 						break;
@@ -1006,21 +998,9 @@ public partial class CriProfiler
 					this.StopProfiling();
 				}
 				break;
-			case TcpCommandId.CRITCP_MAIL_PREVIEW_CPU_LOAD:
-				this.timestamp = header.time;
-				if (this.timestampStart == 0) {
-					this.timestampStart = this.timestamp;
-				}
-				if (GetLogFuncId(header.function_id) == LogFuncId.LOG_COMMAND_CpuLoadAndNumUsedVoices) {
-					this.cpu_load = LoadBigEndianSingle(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_CpuLoad, out offset));
-					this.num_used_voices = LoadBigEndianUInt32(data, GetNextParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_NumUsedVoices, ref offset));
-					lock (cpuLoadHistory) {
-						cpuLoadHistory.EnBuffer(new Single[] { cpu_load }, 1);
-					}
-					lock (voiceUsageHistory) {
-						voiceUsageHistory.EnBuffer(new UInt32[] { num_used_voices }, 1);
-					}
-				}
+			case TcpCommandId.CRITCP_MAIL_EXIT_TO_PROFILER:
+			case TcpCommandId.CRITCP_MAIL_EXIT:
+				this.StopProfiling();
 				break;
 			case TcpCommandId.CRITCP_MAIL_SEND_LOG:
 				this.timestamp = header.time;
@@ -1028,6 +1008,16 @@ public partial class CriProfiler
 					this.timestampStart = this.timestamp;
 				}
 				switch (GetLogFuncId(header.function_id)) {
+					case LogFuncId.LOG_COMMAND_CpuLoadAndNumUsedVoices:
+						this.cpu_load = LoadBigEndianSingle(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_CpuLoad, out offset));
+						this.num_used_voices = LoadBigEndianUInt32(data, GetNextParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_NumUsedVoices, ref offset));
+						lock (cpuLoadHistory) {
+							cpuLoadHistory.EnBuffer(new Single[] { cpu_load }, 1);
+						}
+						lock (voiceUsageHistory) {
+							voiceUsageHistory.EnBuffer(new UInt32[] { num_used_voices }, 1);
+						}
+						break;
 					case LogFuncId.LOG_COMMAND_LoudnessInfoWithRackId:
 						rack_id = LoadBigEndianUInt32(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_RackId, out offset));
 						if (rack_id == 0) {
@@ -1115,8 +1105,8 @@ public partial class CriProfiler
 						dataSize = LoadBigEndianUInt16(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_CueName, out offset)); /* cue name */
                         dataSize2 = LoadBigEndianUInt16(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_ExAcbName, out offset2)); /* cuesheet name */
 						if (dataSize > 1 && dataSize2 > 1) {
-							this.cuename_lastPlayed = System.Text.Encoding.Default.GetString(data, GetStrDataOffset(header, offset), dataSize);
-                            this.cuesheetName_lastPlayed = System.Text.Encoding.Default.GetString(data, GetStrDataOffset(header, offset2), dataSize2);
+							this.cuename_lastPlayed = System.Text.Encoding.Default.GetString(data, GetStrDataOffset(header, offset), dataSize).TrimEnd('\0');
+                            this.cuesheetName_lastPlayed = System.Text.Encoding.Default.GetString(data, GetStrDataOffset(header, offset2), dataSize2).TrimEnd('\0');
 							try {
 								lock (playbackHashtable) {
 									this.playbackHashtable.Add(playbackId, new PlaybackInfo(playbackId, cuename_lastPlayed, cuesheetName_lastPlayed, header.time));
@@ -1139,22 +1129,6 @@ public partial class CriProfiler
 							}
 						}
 						break;
-					case LogFuncId.LOG_COMMAND_ExAsrConfig:
-						numOutputCh = LoadBigEndianByte(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_OutputChannels, out offset));
-						if (numOutputCh > this.numChMasterOut) {
-							numChMasterOut = numOutputCh;
-						}
-						break;
-					default:
-						break;
-				}
-				break;
-			case TcpCommandId.CRITCP_MAIL_MONITOR_ATOM_EXPLAYBACKINFO_PLAY_END:
-				this.timestamp = header.time;
-				if (this.timestampStart == 0) {
-					this.timestampStart = this.timestamp;
-				}
-				switch (GetLogFuncId(header.function_id)) {
 					case LogFuncId.LOG_COMMAND_ExPlaybackInfo_FreeInfo:
 						playbackId = LoadBigEndianUInt32(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_ExPlaybackId, out offset));
 						lock (playbackHashtable) {
@@ -1164,6 +1138,12 @@ public partial class CriProfiler
 								this.AddPlaybackToTimeline(new Playback(playbackId, header.time, false, info.cueName, info.cueSheetName));
 								playbackHashtable.Remove(playbackId);
 							}
+						}
+						break;
+					case LogFuncId.LOG_COMMAND_ExAsrConfig:
+						numOutputCh = LoadBigEndianByte(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_OutputChannels, out offset));
+						if (numOutputCh > this.numChMasterOut) {
+							numChMasterOut = numOutputCh;
 						}
 						break;
 					default:
@@ -1218,8 +1198,8 @@ public partial class CriProfiler
 				playbackId = LoadBigEndianUInt32(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_ExPlaybackId, out offset));
 				dataSize = LoadBigEndianUInt16(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_CueName, out offset)); /* cue name */
 				dataSize2 = LoadBigEndianUInt16(data, FindParamOffset(data, header, LogParamId.LOG_STRINGS_ITEM_ExAcbName, out offset2)); /* cuesheet name */
-				str1 = System.Text.Encoding.Default.GetString(data, GetStrDataOffset(header, offset), dataSize);
-				str2 = System.Text.Encoding.Default.GetString(data, GetStrDataOffset(header, offset2), dataSize2);
+				str1 = System.Text.Encoding.Default.GetString(data, GetStrDataOffset(header, offset), dataSize).TrimEnd('\0');
+				str2 = System.Text.Encoding.Default.GetString(data, GetStrDataOffset(header, offset2), dataSize2).TrimEnd('\0');
 				output = MicroSec2String(header.time) + " | Start ID : " + playbackId + " | cuename : " + str1 + " | cuesheet : " + str2;
 				break;
 			case LogFuncId.LOG_COMMAND_ExPlaybackInfo_FreeInfo:

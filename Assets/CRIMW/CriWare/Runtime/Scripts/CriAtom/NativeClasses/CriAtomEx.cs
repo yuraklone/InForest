@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Linq;
 using AisacControlId = System.UInt32;
 
 namespace CriWare {
@@ -253,6 +254,10 @@ public static class CriAtomEx
 		WAVE        = 0x00000005,       /**< Wave */
 		RAW_PCM     = 0x00000006,       /**< RawPCM */
 		AUDIO_BUFFER = 0x00000009,      /**< Audio Buffer */
+		HW1			= 0x00010001,		/**< ハードウェア固有	*/
+		HW2			= 0x00010002,		/**< ハードウェア固有	*/
+		HW3			= 0x00010003,		/**< ハードウェア固有	*/
+		MP3			= HW3,				/**< MP3再生 */
 	}
 
 	/**
@@ -779,6 +784,10 @@ public static class CriAtomEx
 		public float            volume;                     /**< ボリューム */
 		/** <summary>無音時処理モード</summary> */
 		public CriAtomEx.SilentMode silentMode;
+		/** <summary>ピッチ</summary> */
+		public float pitch;
+		/** <summary>セレクタインデックス</summary> */
+		public ushort selectorIndex;
 
 
 		public CueInfo(byte[] data, int startIndex)
@@ -806,6 +815,8 @@ public static class CriAtomEx
 				this.gameVariableInfo   = new GameVariableInfo(data, startIndex + 140);
 				this.volume    = BitConverter.ToSingle(data, startIndex + 152);
 				this.silentMode = (SilentMode)BitConverter.ToInt32(data, startIndex + 156);
+				this.pitch = BitConverter.ToSingle(data, startIndex + 160);
+				this.selectorIndex = BitConverter.ToUInt16(data, startIndex + 162);
 			} else {
 				this.id = BitConverter.ToInt32(data, startIndex + 0);
 				this.type   = (CueType)BitConverter.ToInt32(data, startIndex + 4);
@@ -830,6 +841,8 @@ public static class CriAtomEx
 				this.gameVariableInfo   = new GameVariableInfo(data, startIndex + 152);
 				this.volume    = BitConverter.ToSingle(data, startIndex + 168);
 				this.silentMode = (SilentMode)BitConverter.ToInt32(data, startIndex + 172);
+				this.pitch = BitConverter.ToSingle(data, startIndex + 176);
+				this.selectorIndex = BitConverter.ToUInt16(data, startIndex + 178);
 			}
 		}
 	}
@@ -1161,7 +1174,7 @@ public static class CriAtomEx
 	 * <returns>情報が取得できたかどうか？</returns>
 	 * <remarks>
 	 * <para header='説明'>ゲーム変数インデックスからゲーム変数情報を取得します。<br/>
-	 * 指定したインデックスのゲーム変数が存在しない場合、falseが返ります。</para>
+	 * 指定したインデックスのゲーム変数が存在しない場合、Falseが返ります。</para>
 	 * <para header='注意'>本関数を実行する前に、ACFファイルを登録しておく必要があります。<br/></para>
 	 * </remarks>
 	 */
@@ -1378,6 +1391,55 @@ public static class CriAtomEx
 	}
 
 	/**
+	 * <summary>[PC] 出力デバイスの取得(デバイスID)</summary>
+	 * <param name='isDefaultDevice'>デフォルトデバイスか否か</param>
+	 * <remarks>
+	 * <para header='説明'>Atomからの音声出力先となるデバイスIDを取得します。</para>
+	 * </remarks>
+	 */
+	public static string GetOutputAudioDeviceId_PC(out bool isDefaultDevice)
+	{
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+		StringBuilder audioDevice = new StringBuilder(256);
+		criAtom_GetDeviceId_WASAPI(SoundRendererType.Native, audioDevice, audioDevice.Capacity, out var is_default_device);
+		isDefaultDevice = is_default_device != 0;
+		var result = audioDevice.ToString();
+		audioDevice.Clear();
+		return result;
+#else
+		isDefaultDevice = false;
+		return null;
+#endif
+		}
+
+	/**
+	 * <summary>[PC] 出力デバイスの取得(インデックス)</summary>
+	 * <param name='isDefaultDevice'>デフォルトデバイスか否か</param>
+	 * <remarks>
+	 * <para header='説明'>Atomからの音声出力先となるデバイスのインデックスを取得します。</para>
+	 * </remarks>
+	 */
+	public static int GetOutputAudioDeviceIndex_PC(out bool isDefaultDevice)
+	{
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+			var currentId = GetOutputAudioDeviceId_PC(out isDefaultDevice);
+			var id = new char[currentId.Length];
+			for(int i =0; i < GetNumAudioDevices_PC(); i++)
+			{
+				Marshal.Copy(criAtomUnity_GetAudioDeviceId_PC(i), id, 0, currentId.Length);
+				if (currentId.SequenceEqual(id))
+				{
+					return i;
+				}
+			}
+			return -1;
+#else
+		isDefaultDevice = false;
+		return -1;
+#endif
+	}
+
+	/**
 	 * <summary>[PC] 出力デバイスリストの初期化</summary>
 	 * <remarks>
 	 * <para header='説明'>Atomからの音声出力先となるデバイスリストを初期化します。<br/>
@@ -1461,11 +1523,66 @@ public static class CriAtomEx
 
 
 	/**
+	 * <summary>[iOS] バックグラウンド再生の開始</summary>
+	 * <remarks>
+	 * <para header='説明'>バックグラウンド再生の開始をAtomライブラリに通知します。</para>
+	 * </remarks>
+	 */
+	public static void EnableBackgroundPlayback_IOS() {
+	#if !UNITY_EDITOR && UNITY_IOS
+		criAtomEx_EnableBackgroundPlayback_IOS();
+	#endif
+	}
+
+	/**
+	 * <summary>[iOS] バックグラウンド再生の終了</summary>
+	 * <remarks>
+	 * <para header='説明'>バックグラウンド再生の終了をAtomライブラリに通知します。</para>
+	 * </remarks>
+	 */
+	public static void DisableBackgroundPlayback_IOS() {
+	#if !UNITY_EDITOR && UNITY_IOS
+		criAtomEx_DisableBackgroundPlayback_IOS();
+	#endif
+	}
+
+	/**
+	 * <summary>[iOS] 割り込みフラグの取得</summary>
+	 * <remarks>
+	 * <para header='説明'>外部要因によって音声の割り込みが発生し、Atomライブラリの音声が停止している場合 true が返ります。<br/>
+	 * CriWareInitializerコンポーネントの「Enable OS Notification Handling」設定を有効にして初期化している場合、
+	 * Atomライブラリの音声を自動復帰します。自動復帰が完了すると false が返ります。<br/>
+	 * CriWare.CriAtomEx.EnableBackgroundPlayback_IOS でバックグラウンド再生を有効にしている場合、
+	 * 自動復帰は無効になります。音声を復帰させる場合は CriWare.CriAtomEx.ResumeAudio_IOS を呼び出して音声を再開してください。<br/></para>
+	 * </remarks>
+	 */
+	public static bool IsInterruptedOtherAudio_IOS() {
+	#if !UNITY_EDITOR && UNITY_IOS
+		return criAtomEx_IsInterruptedOtherAudio_IOS();
+	#else
+		return false;
+	#endif
+	}
+
+	/**
+	 * <summary>[iOS] 音声の再開</summary>
+	 * <remarks>
+	 * <para header='説明'>バックグラウンド再生有効時に音声が停止した際、音声を復帰させます。
+	 * CriWare.CriAtomEx.IsInterruptedOtherAudio_IOS が true を返すタイミングのみ効果があります。</para>
+	 * </remarks>
+	 */
+	public static void ResumeAudio_IOS() {
+	#if !UNITY_EDITOR && UNITY_IOS
+		criAtomEx_ResumeAudio_IOS();
+	#endif
+	}
+
+	/**
 	 * <summary>[iOS] サウンド出力停止の確認</summary>
 	 * <remarks>
 	 * <para header='説明'>サウンド出力が停止しているかどうかの確認を行います。<br/>
-	 * trueの場合、サウンド出力が停止しています。<br/>
-	 * アプリケーションをポーズしていないにも関わらず本関数がtrueを返した場合は、
+	 * Trueの場合、サウンド出力が停止しています。<br/>
+	 * アプリケーションをポーズしていないにも関わらず本関数がTrueを返した場合は、
 	 * アプリケーションに検知されないシステムの割り込み等により、サウンド出力が妨げられています。<br/>
 	 * 音声と同期した処理を行う場合には、本関数によりサウンド出力状態を確認し、
 	 * 必要に応じてポーズ処理を追加してください。</para>
@@ -1618,6 +1735,8 @@ public static class CriAtomEx
 	#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtom_SetDeviceId_WASAPI(SoundRendererType soundRendererType, [MarshalAs(UnmanagedType.LPWStr)]string deviceId);
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	private static extern Int32 criAtom_GetDeviceId_WASAPI(SoundRendererType soundRendererType, [MarshalAs(UnmanagedType.LPWStr)]StringBuilder deviceId, Int32 count, out Int32 is_default_device);
 
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtom_SetDeviceId_WASAPI(CriAtomEx.SoundRendererType type, IntPtr deviceId);
@@ -1656,6 +1775,18 @@ public static class CriAtomEx
 	#endif
 
 	#if !UNITY_EDITOR && UNITY_IOS
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	public static extern void criAtomEx_EnableBackgroundPlayback_IOS();
+
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	public static extern void criAtomEx_DisableBackgroundPlayback_IOS();
+
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	public static extern bool criAtomEx_IsInterruptedOtherAudio_IOS();
+
+	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+	public static extern void criAtomEx_ResumeAudio_IOS();
+
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	public static extern bool criAtomUnity_IsSoundStopped_IOS();
 
@@ -1703,6 +1834,7 @@ public static class CriAtomEx
 	#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 	private static void criAtom_SetDeviceId_WASAPI(SoundRendererType soundRendererType, string deviceId) { }
 	private static void criAtom_SetDeviceId_WASAPI(CriAtomEx.SoundRendererType type, IntPtr deviceId) { }
+	private static Int32 criAtom_GetDeviceId_WASAPI(SoundRendererType soundRendererType, [MarshalAs(UnmanagedType.LPWStr)]StringBuilder deviceId, Int32 count, out Int32 is_default_device){is_default_device = 0; return 0;}
 	private static bool criAtomUnity_LoadAudioDeviceList_PC() { return false; }
 	private static int criAtomUnity_GetNumAudioDevices_PC() { return 0; }
 	private static IntPtr criAtomUnity_GetAudioDeviceName_PC(int index) { return IntPtr.Zero; }
@@ -1721,6 +1853,10 @@ public static class CriAtomEx
 	public static int criAtom_GetSlBufferConsumptionLatency_ANDROID() { return 0; }
 	#endif
 	#if !UNITY_EDITOR && UNITY_IOS
+	public static void criAtomEx_EnableBackgroundPlayback_IOS() { }
+	public static void criAtomEx_DisableBackgroundPlayback_IOS() { }
+	public static bool criAtomEx_IsInterruptedOtherAudio_IOS() { return false; }
+	public static void criAtomEx_ResumeAudio_IOS() { }
 	public static bool criAtomUnity_IsSoundStopped_IOS() { return false; }
 	public static void criAtomUnity_EnableAudioSessionRestoration_IOS(bool flag) { }
 	#endif
@@ -1988,7 +2124,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>名前指定によるカテゴリミュート状態設定</summary>
 	 * <param name='name'>カテゴリ名</param>
-	 * <param name='mute'>ミュート状態（false = ミュート解除、true = ミュート）</param>
+	 * <param name='mute'>ミュート状態（False = ミュート解除、True = ミュート）</param>
 	 * <remarks>
 	 * <para header='説明'>名前指定でカテゴリのミュート状態を設定します。</para>
 	 * </remarks>
@@ -2001,7 +2137,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>ID指定によるカテゴリミュート状態設定</summary>
 	 * <param name='id'>カテゴリID</param>
-	 * <param name='mute'>ミュート状態（false = ミュート解除、true = ミュート）</param>
+	 * <param name='mute'>ミュート状態（False = ミュート解除、True = ミュート）</param>
 	 * <remarks>
 	 * <para header='説明'>ID指定でカテゴリのミュート状態を設定します。</para>
 	 * </remarks>
@@ -2014,7 +2150,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>名前指定によるカテゴリミュート状態取得</summary>
 	 * <param name='name'>カテゴリ名</param>
-	 * <returns>ミュート状態（false = ミュート中ではない、true = ミュート中）</returns>
+	 * <returns>ミュート状態（False = ミュート中ではない、True = ミュート中）</returns>
 	 * <remarks>
 	 * <para header='説明'>名前指定でカテゴリのミュート状態を取得します。</para>
 	 * </remarks>
@@ -2027,7 +2163,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>ID指定によるカテゴリミュート状態取得</summary>
 	 * <param name='id'>カテゴリID</param>
-	 * <returns>ミュート状態（false = ミュート中ではない、true = ミュート中）</returns>
+	 * <returns>ミュート状態（False = ミュート中ではない、True = ミュート中）</returns>
 	 * <remarks>
 	 * <para header='説明'>ID指定でカテゴリのミュート状態を取得します。</para>
 	 * </remarks>
@@ -2040,7 +2176,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>名前指定によるカテゴリソロ状態設定</summary>
 	 * <param name='name'>カテゴリ名</param>
-	 * <param name='solo'>ソロ状態（false = ソロ解除、true = ソロ）</param>
+	 * <param name='solo'>ソロ状態（False = ソロ解除、True = ソロ）</param>
 	 * <param name='muteVolume'>他のカテゴリに適用するミュートボリューム値</param>
 	 * <remarks>
 	 * <para header='説明'>名前指定でカテゴリのソロ状態を設定します。<br/>
@@ -2056,7 +2192,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>ID指定によるカテゴリソロ状態設定</summary>
 	 * <param name='id'>カテゴリID</param>
-	 * <param name='solo'>ソロ状態（false = ソロ解除、true = ソロ）</param>
+	 * <param name='solo'>ソロ状態（False = ソロ解除、True = ソロ）</param>
 	 * <param name='muteVolume'>他のカテゴリに適用するミュートボリューム値</param>
 	 * <remarks>
 	 * <para header='説明'>ID指定でカテゴリのソロ状態を設定します。<br/>
@@ -2072,7 +2208,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>名前指定によるカテゴリソロ状態取得</summary>
 	 * <param name='name'>カテゴリ名</param>
-	 * <returns>ソロ状態（false = ソロ中ではない、true = ソロ中）</returns>
+	 * <returns>ソロ状態（False = ソロ中ではない、True = ソロ中）</returns>
 	 * <remarks>
 	 * <para header='説明'>名前指定でカテゴリのソロ状態を取得します。</para>
 	 * </remarks>
@@ -2085,7 +2221,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>ID指定によるカテゴリソロ状態取得</summary>
 	 * <param name='id'>カテゴリID</param>
-	 * <returns>ソロ状態（false = ソロ中ではない、true = ソロ中）</returns>
+	 * <returns>ソロ状態（False = ソロ中ではない、True = ソロ中）</returns>
 	 * <remarks>
 	 * <para header='説明'>ID指定でカテゴリのソロ状態を取得します。</para>
 	 * </remarks>
@@ -2098,7 +2234,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>名前指定によるカテゴリのポーズ／ポーズ解除</summary>
 	 * <param name='name'>カテゴリ名</param>
-	 * <param name='pause'>スイッチ（false = ポーズ解除、true = ポーズ）</param>
+	 * <param name='pause'>スイッチ（False = ポーズ解除、True = ポーズ）</param>
 	 * <remarks>
 	 * <para header='説明'>名前指定でカテゴリのポーズ／ポーズ解除を行います。<br/>
 	 * カテゴリを名前で指定する以外は、
@@ -2114,7 +2250,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>ID指定によるカテゴリのポーズ／ポーズ解除</summary>
 	 * <param name='id'>カテゴリID</param>
-	 * <param name='pause'>スイッチ（false = ポーズ解除、true = ポーズ）</param>
+	 * <param name='pause'>スイッチ（False = ポーズ解除、True = ポーズ）</param>
 	 * <remarks>
 	 * <para header='説明'>ID指定でカテゴリのポーズ／ポーズ解除を行います。<br/></para>
 	 * <para header='備考'>カテゴリのポーズは、AtomExプレーヤ／再生音のポーズ
@@ -2132,7 +2268,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>ID指定によるカテゴリのポーズ状態取得</summary>
 	 * <param name='name'>カテゴリID</param>
-	 * <returns>ポーズ状態（false = ポーズ中ではない、true = ポーズ中）</returns>
+	 * <returns>ポーズ状態（False = ポーズ中ではない、True = ポーズ中）</returns>
 	 * <remarks>
 	 * <para header='説明'>ID指定でカテゴリのポーズ状態を取得します。</para>
 	 * </remarks>
@@ -2145,7 +2281,7 @@ public static class CriAtomExCategory
 	/**
 	 * <summary>名前指定によるカテゴリのポーズ／ポーズ解除</summary>
 	 * <param name='id'>カテゴリ名</param>
-	 * <returns>ポーズ状態（false = ポーズ中ではない、true = ポーズ中）</returns>
+	 * <returns>ポーズ状態（False = ポーズ中ではない、True = ポーズ中）</returns>
 	 * <remarks>
 	 * <para header='説明'>名前指定でカテゴリのポーズ状態を取得します。</para>
 	 * </remarks>
@@ -2219,7 +2355,19 @@ public static class CriAtomExCategory
 	 * <param name='name'>REACT名</param>
 	 * <param name='parameter'>REACT駆動パラメータ構造体</param>
 	 * <remarks>
-	 * <para header='説明'>REACTを駆動させるパラメータを設定します。<br/></para>
+	 * <para header='説明'>REACTを駆動させるパラメータを設定します。<br/>
+	 * 例として、特定のREACTによるダッキングを無効にする操作は次のとおりです。<code>
+	 * // REACT名で操作対象を指定
+	 * var reactName = "react_name";
+	 * // 現在のパラメータを取得
+	 * CriAtomExCategory.GetReactParameter(reactName, out var reactParameter);
+	 * // 減衰先ボリュームを1(減衰なし)に指定
+	 * reactParameter.parameter.ducker.target.volume.level = 1;
+	 * // REACTが駆動中でなければ適用
+	 * if(CriAtomExCategory.GetReactStatus(reactName) == ReactStatus.Stop)
+	 * 	CriAtomExCategory.SetReactParameter(reactName, reactParameter);
+	 * </code>
+	 * </para>
 	 * <para header='注意'>REACTが動作している間はパラメータを設定することはできません（警告が発生します）。<br/>
 	 * 存在しないREACT名を指定した場合は、エラーコールバックが返ります。<br/></para>
 	 * </remarks>
@@ -2237,7 +2385,7 @@ public static class CriAtomExCategory
 	 * <param name='parameter'>REACT駆動パラメータ構造体</param>
 	 * <remarks>
 	 * <para header='説明'>REACTを駆動させるパラメータの現在値を取得します。<br/></para>
-	 * <para header='注意'>存在しないREACT名を指定した場合は、エラーコールバックが発生しCRI_FALSEが返ります。<br/>
+	 * <para header='注意'>存在しないREACT名を指定した場合は、エラーコールバックが発生しCRI_Falseが返ります。<br/>
 	 * 存在しないREACT名を指定した場合は、エラーコールバックが返ります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExCategory::SetReactParameter'/>
@@ -2254,7 +2402,7 @@ public static class CriAtomExCategory
 	 * <param name='aisacInfo'>AISAC情報取得用構造体</param>
 	 * <remarks>
 	 * <para header='説明'>ID指定でカテゴリにアタッチされているAISACの情報を取得します。<br/></para>
-	 * <para header='注意'>存在しないカテゴリを指定した場合や、無効なインデックスを指定した場合、falseが返ります。<br/></para>
+	 * <para header='注意'>存在しないカテゴリを指定した場合や、無効なインデックスを指定した場合、Falseが返ります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExCategory::GetNumAttachedAisacs'/>
 	 */
@@ -2278,7 +2426,7 @@ public static class CriAtomExCategory
 	 * <param name='aisacInfo'>AISAC情報取得用構造体</param>
 	 * <remarks>
 	 * <para header='説明'>名前指定でカテゴリにアタッチされているAISACの情報を取得します。<br/></para>
-	 * <para header='注意'>存在しないカテゴリを指定した場合や、無効なインデックスを指定した場合、falseが返ります。<br/></para>
+	 * <para header='注意'>存在しないカテゴリを指定した場合や、無効なインデックスを指定した場合、Falseが返ります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExCategory::GetNumAttachedAisacs'/>
 	 */
@@ -2304,7 +2452,7 @@ public static class CriAtomExCategory
 	 * <returns>現在値を取得できたかどうか？（取得できた：true／取得できない：false）</returns>
 	 * <remarks>
 	 * <para header='説明'>カテゴリにアタッチされているAISACコントロールの現在値を取得します。<br/></para>
-	 * <para header='注意'>存在しないカテゴリを指定した場合や、無効なインデックスを指定した場合、falseが返ります。<br/></para>
+	 * <para header='注意'>存在しないカテゴリを指定した場合や、無効なインデックスを指定した場合、Falseが返ります。<br/></para>
 	 * </remarks>
 	 * <seealso cref='CriAtomExCategory::GetNumAttachedAisacs'/>
 	 */
@@ -3147,10 +3295,13 @@ public class CriAtomExAsr
 	 */
 	public static void AttachBusAnalyzer(int interval, int peakHoldTime)
 	{
-		BusAnalyzerConfig config;
+		int numBuses;
+		numBuses = criAtomExAsrRack_GetNumBuses(CriAtomExAsrRack.defaultRackId);
+
+        BusAnalyzerConfig config;
 		config.interval = interval;
 		config.peakHoldTime = peakHoldTime;
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < numBuses; i++) {
 			criAtomExAsr_AttachBusAnalyzer(i, ref config);
 		}
 	}
@@ -3324,7 +3475,7 @@ public class CriAtomExAsr
 	 * <summary>DSPバスエフェクトのバイパス設定</summary>
 	 * <param name='busName'>バス名</param>
 	 * <param name='effectName'>エフェクト名</param>
-	 * <param name='bypass'>バイパス設定（true:バイパスを行う, false:バイパスを行わない）</param>
+	 * <param name='bypass'>バイパス設定（True:バイパスを行う, False:バイパスを行わない）</param>
 	 * <remarks>
 	 * <para header='説明'>エフェクトのバイパス設定を行います。<br/>
 	 * バイパス設定されたエフェクトは音声処理の際、スルーされるようになります。<br/>
@@ -3380,7 +3531,7 @@ public class CriAtomExAsr
 	/**
 	 * <summary>ユーザ定義エフェクトインターフェースの登録</summary>
 	 * <param name='afx_interface'>ユーザ定義エフェクトのバージョン情報付きインターフェース</param>
-	 * <returns>登録に成功したか？（true:登録に成功した, false:登録に失敗した）</returns>
+	 * <returns>登録に成功したか？（True:登録に成功した, False:登録に失敗した）</returns>
 	 * <remarks>
 	 * <para header='説明'>ユーザ定義エフェクトインターフェースをASRに登録します。<br/>
 	 * ユーザ定義エフェクトインターフェースを登録したエフェクトはDSPバス設定をアタッチする際に使用できるようになります。<br/>
@@ -3628,6 +3779,8 @@ public class CriAtomExAsr
 	private static extern Boolean criAtomExAsr_IsEnabledBinauralizer();
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 	private static extern void criAtomExAsr_PauseOutputVoice(Boolean sw);
+    [DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+    private static extern int criAtomExAsrRack_GetNumBuses(int rackId);
 
 #if UNITY_EDITOR
 	[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
@@ -3675,6 +3828,7 @@ public class CriAtomExAsr
 	private static void criAtomExAsr_EnableBinauralizer(Boolean enabled) {}
 	private static Boolean criAtomExAsr_IsEnabledBinauralizer() { return false; }
 	private static void criAtomExAsr_PauseOutputVoice(Boolean sw) { }
+	private static int criAtomExAsrRack_GetNumBuses(int rackId) { return 0; }
 #if UNITY_EDITOR
 	private static int criAtomExAsr_GetPcmDataFloat32(int outputChannels, int outputSamples, IntPtr[] samples) { return 0; }
 	private static int criAtomExAsr_GetNumBufferedSamples() { return 0; }
@@ -3699,6 +3853,7 @@ public class CriAtomExAsr
  * レベルを測定することができます。<br/></para>
  * </remarks>
  */
+[Obsolete("This feature is obsoleted. Estimation will not occur if SonicSYNC is enabled.")]
 public static class CriAtomExLatencyEstimator
 {
 	/**

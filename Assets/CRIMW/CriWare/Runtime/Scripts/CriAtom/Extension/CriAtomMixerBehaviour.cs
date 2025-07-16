@@ -75,14 +75,25 @@ namespace CriTimeline.Atom
 				if (CriAtomPlugin.IsLibraryInitialized() == false) {
 					CriAtomTimelinePreviewer.InstanceDispose();
 
-					CriWareInitializer criInitializer = GameObject.FindObjectOfType<CriWareInitializer>();
+					CriWareInitializer criInitializer = null;
+#if UNITY_2023_1_OR_NEWER
+					criInitializer = GameObject.FindAnyObjectByType<CriWareInitializer>();
+#else
+					criInitializer = GameObject.FindObjectOfType<CriWareInitializer>();
+#endif
 					if (criInitializer != null) {
 						CriWareInitializer.InitializeAtom(criInitializer.atomConfig);
 					} else {
 						CriWareInitializer.InitializeAtom(new CriAtomConfig());
 						Debug.Log("[CRIWARE] Timeline / Atom: Can't find CriWareInitializer component; Using default parameters in edit mode.");
 					}
-					CriAtomTimelinePreviewer.Instance.InitPreviewListenerList(GameObject.FindObjectsOfType<CriAtomListener>());
+					CriAtomTimelinePreviewer.Instance.InitPreviewListenerList(
+#if UNITY_2023_1_OR_NEWER
+						GameObject.FindObjectsByType<CriAtomListener>(FindObjectsSortMode.None)
+#else
+						GameObject.FindObjectsOfType<CriAtomListener>()
+#endif
+					);
 				}
 			}
 
@@ -123,7 +134,7 @@ namespace CriTimeline.Atom
 							clipBehaviour.Stop(criAtomClip.stopWithoutRelease);
 						}
 					} else if (criAtomClip.muted == false) {
-						long seekTimeMs = (long)((m_Director.time - clip.start) * 1000.0);
+						long seekTimeMs = (long)((m_Director.time + clip.clipIn - clip.start ) * 1000.0);
 						bool isDirectorPaused = (m_Director.state == PlayState.Paused);
 
 						var playConfig = new CriAtomClipPlayConfig(
@@ -194,7 +205,7 @@ namespace CriTimeline.Atom
 		}
 	}
 
-	public class CriAtomTimelinePreviewer : IDisposable {
+	public partial class CriAtomTimelinePreviewer : IDisposable {
 		static private CriAtomTimelinePreviewer instance = null;
 		static public CriAtomTimelinePreviewer Instance {
 			get {
@@ -452,8 +463,12 @@ namespace CriTimeline.Atom
 				return null;
 			}
 
-			this.atom = (CriAtom)UnityEngine.Object.FindObjectOfType(typeof(CriAtom));
-			if(this.atom != null)
+#if UNITY_2023_1_OR_NEWER
+			this.atom = UnityEngine.Object.FindAnyObjectByType<CriAtom>();
+#else
+			this.atom = UnityEngine.Object.FindObjectOfType<CriAtom>();
+#endif
+			if (this.atom != null)
 			{
 				if (lastAcfFile != this.atom.acfFile) {
 					CriAtomEx.UnregisterAcf();

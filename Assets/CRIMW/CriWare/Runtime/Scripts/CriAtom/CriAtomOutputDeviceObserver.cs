@@ -5,6 +5,8 @@
  ****************************************************************************/
 #if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
 #define CRIWAREPLUGIN_SUPPORT_OUTPUTDEVICE_OBSERVER
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+#define CRIWAREPLUGIN_SUPPORT_OUTPUTDEVICE_OBSERVER
 #endif
 
 using System;
@@ -97,6 +99,8 @@ public class CriAtomOutputDeviceObserver : CriMonoBehaviour
 			return UnsafeNativeMethods.criAtomUnity_IsOutputDeviceConnected_IOS();
 #elif !UNITY_EDITOR && UNITY_ANDROID
 			return instance.isConnected;
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+			return UnsafeNativeMethods.criAtomUnity_IsOutputDeviceConnected_WASAPI();
 #else
 			return false;
 #endif
@@ -171,6 +175,8 @@ public class CriAtomOutputDeviceObserver : CriMonoBehaviour
 		}
 		checker.Call("Start", activity);
 		CheckOutputDevice_ANDROID();
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+		UnsafeNativeMethods.criAtomUnity_StartOutputDeviceObserver_WASAPI();
 #endif
 		isConnected = lastIsConnected = IsDeviceConnected;
 		deviceType = lastDeviceType = DeviceType;
@@ -202,6 +208,8 @@ public class CriAtomOutputDeviceObserver : CriMonoBehaviour
 			checker.Call("Stop", activity);
 		}
 		checker = null;
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+		UnsafeNativeMethods.criAtomUnity_StopOutputDeviceObserver_WASAPI();
 #endif
 #endif
 	}
@@ -274,12 +282,25 @@ public class CriAtomOutputDeviceObserver : CriMonoBehaviour
 		[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
 		internal static extern OutputDeviceType criAtomUnity_GetOutputDeviceType_IOS();
 #endif
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+		[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+		internal static extern void criAtomUnity_StartOutputDeviceObserver_WASAPI();
+		[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+		internal static extern void criAtomUnity_StopOutputDeviceObserver_WASAPI();
+		[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
+		internal static extern bool criAtomUnity_IsOutputDeviceConnected_WASAPI();
+#endif
 #else
 #if !UNITY_EDITOR && UNITY_IOS
 		internal static bool criAtomUnity_StartOutputDeviceObserver_IOS() { return false; }
 		internal static void criAtomUnity_StopOutputDeviceObserver_IOS() { }
 		internal static bool criAtomUnity_IsOutputDeviceConnected_IOS() { return false; }
 		internal static OutputDeviceType criAtomUnity_GetOutputDeviceType_IOS() { return OutputDeviceType.BuiltinSpeaker; }
+#endif
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+		internal static void criAtomUnity_StartOutputDeviceObserver_WASAPI() { }
+		internal static void criAtomUnity_StopOutputDeviceObserver_WASAPI() { }
+		internal static bool criAtomUnity_IsOutputDeviceConnected_WASAPI() { return false; }
 #endif
 #endif
 	}

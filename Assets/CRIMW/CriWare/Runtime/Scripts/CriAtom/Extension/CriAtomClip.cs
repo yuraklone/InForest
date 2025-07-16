@@ -19,6 +19,11 @@ namespace CriTimeline.Atom
 	{
 		public string cueSheet;
 		public string cueName;
+		public CriAtomBehaviour templateBehaviour = new CriAtomBehaviour();
+
+		public override Playable CreatePlayable(PlayableGraph graph, GameObject owner) {
+			return ScriptPlayable<CriAtomBehaviour>.Create(graph, templateBehaviour);
+		}
 
 		public override string CueName {
 			get {
@@ -30,7 +35,12 @@ namespace CriTimeline.Atom
 
 		CriAtomCueSheet GetCueSheet() {
 #if UNITY_EDITOR
-			var atom = (CriAtom)UnityEngine.Object.FindObjectOfType(typeof(CriAtom));
+			CriAtom atom = null;
+#if UNITY_2023_1_OR_NEWER
+			atom = UnityEngine.Object.FindAnyObjectByType<CriAtom>();
+#else
+			atom = UnityEngine.Object.FindObjectOfType<CriAtom>();
+#endif
 			if (atom == null)
 			{
 				Debug.LogWarning("[CRIWARE] Timeline Previewer: CriAtom not set in the scene");
@@ -79,16 +89,10 @@ namespace CriTimeline.Atom
 		public bool loopWithinClip = false;
 		public bool stopAtClipEnd = true;
 
-		public CriAtomBehaviour templateBehaviour = new CriAtomBehaviour();
-
 		[SerializeField, HideInInspector] private double clipDuration = 0.0;
 
 		public ClipCaps clipCaps {
-			get { return ClipCaps.Looping | ClipCaps.SpeedMultiplier | ClipCaps.Blending; }
-		}
-
-		public override Playable CreatePlayable(PlayableGraph graph, GameObject owner) {
-			return ScriptPlayable<CriAtomBehaviour>.Create(graph, templateBehaviour);
+			get { return ClipCaps.Looping | ClipCaps.SpeedMultiplier | ClipCaps.Blending | ClipCaps.ClipIn; }
 		}
 
 		public void SetClipDuration(double clipDuration) {

@@ -43,11 +43,11 @@ public class CriAtomExSoundObject : CriDisposable
 	 * <returns>サウンドオブジェクト</returns>
 	 * <remarks>
 	 * <para header='説明'>サウンドオブジェクトを作成します。<br/>
-	 * enableVoiceLimitScope に true を指定すると、このサウンドオブジェクトに
+	 * enableVoiceLimitScope に True を指定すると、このサウンドオブジェクトに
 	 * 関連付けられたExプレーヤから再生した音声の発音数について、このサウンド
 	 * オブジェクト内でのみカウントし、ボイスリミットグループによる発音数制御を
 	 * 行います。<br/>
-	 * enableCategoryCueLimit に true を指定すると、このサウンドオブジェクトに
+	 * enableCategoryCueLimit に True を指定すると、このサウンドオブジェクトに
 	 * 関連付けられたExプレーヤから再生したキューのカテゴリ再生数について、この
 	 * サウンドオブジェクト内でのみカウントし、再生数制御を行います。<br/></para>
 	 * </remarks>

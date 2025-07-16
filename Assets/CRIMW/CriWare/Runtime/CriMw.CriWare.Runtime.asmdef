@@ -1,9 +1,10 @@
 {
     "name": "CriMw.CriWare.Runtime",
+    "rootNamespace": "",
     "references": [
-        "Unity.Timeline"
+        "Unity.Timeline",
+        "Unity.Profiling.Core"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -16,6 +17,12 @@
             "name": "com.unity.timeline",
             "expression": "1.0.0",
             "define": "CRIWARE_TIMELINE_1_OR_NEWER"
+        },
+        {
+            "name": "com.unity.profiling.core",
+            "expression": "1.0.0",
+            "define": "CRIWARE_PROFILING_CORE_1_OR_NEWER"
         }
-    ]
+    ],
+    "noEngineReferences": false
 }

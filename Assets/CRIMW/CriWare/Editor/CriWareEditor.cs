@@ -16,7 +16,12 @@ public class CriWareEditor : UnityEditor.Editor
 	[MenuItem("GameObject/CRIWARE/Create CRIWARE Library Initializer", false, 150)]
 	public static void CreateCriwareLibraryInitalizer()
 	{
-		CriWareInitializer[] criWareInitializerList = FindObjectsOfType(typeof(CriWareInitializer)) as CriWareInitializer[];
+		CriWareInitializer[] criWareInitializerList;
+#if UNITY_2023_1_OR_NEWER
+		criWareInitializerList = FindObjectsByType<CriWareInitializer>(FindObjectsSortMode.InstanceID);
+#else
+		criWareInitializerList = FindObjectsOfType<CriWareInitializer>();
+#endif
 		if (criWareInitializerList.Length > 0) {
 			Debug.LogError("\"CriWareLibraryInitializer\" already exists.");
 
@@ -35,7 +40,12 @@ public class CriWareEditor : UnityEditor.Editor
 	[MenuItem("GameObject/CRIWARE/Create CRIWARE Error Handler", false, 150)]
 	public static void CreateCriwareErrorHandler()
 	{
-		CriWareErrorHandler[] criWareErrorHandlerList = FindObjectsOfType(typeof(CriWareErrorHandler)) as CriWareErrorHandler[];
+		CriWareErrorHandler[] criWareErrorHandlerList;
+#if UNITY_2023_1_OR_NEWER
+		criWareErrorHandlerList = FindObjectsByType<CriWareErrorHandler>(FindObjectsSortMode.InstanceID);
+#else
+		criWareErrorHandlerList = FindObjectsOfType<CriWareErrorHandler>();
+#endif
 		if (criWareErrorHandlerList.Length > 0) {
 			Debug.LogError("\"CriWareErrorHandler\" already exists.");
 

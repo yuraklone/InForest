@@ -354,7 +354,7 @@ public class CriAtomExMic : CriDisposable
 	/**
 	 * <summary>フォーマットがサポート状況の取得</summary>
 	 * <param name='config'>コンフィグ情報</param>
-	 * <returns>true:サポート, false:非サポート</returns>
+	 * <returns>True:サポート, False:非サポート</returns>
 	 * <remarks>
 	 * <para header='説明'>指定したコンフィグ情報のフォーマットがサポートされているか取得します。<br/></para>
 	 * </remarks>
@@ -559,7 +559,7 @@ public class CriAtomExMic : CriDisposable
 
 	/**
 	 * <summary>マイクの使用可能状態の取得</summary>
-	 * <returns>使用可能かどうか(true:使用可能、false:使用不可)</returns>
+	 * <returns>使用可能かどうか(True:使用可能、False:使用不可)</returns>
 	 * <remarks>
 	 * <para header='説明'>オーディオ入力デバイスの状態をチェックして使用可能かどうかを取得します。<br/></para>
 	 * </remarks>
@@ -916,7 +916,7 @@ public class CriAtomExMic : CriDisposable
 	 * <param name='bypass'>バイパス設定</param>
 	 * <remarks>
 	 * <para header='説明'>マイクのエフェクトのバイパスを設定します。<br/>
-	 * bypassにtrueを指定するとエフェクトの処理が行われなくなります。<br/></para>
+	 * bypassにTrueを指定するとエフェクトの処理が行われなくなります。<br/></para>
 	 * </remarks>
 	 */
 	public void SetEffectBypass(Effect effect, bool bypass)

@@ -120,7 +120,7 @@ public class CriAtomConfig {
 	public float serverFrequency  = 60.0f;
 	/** ASRスピーカーマッピング */
 	public CriAtom.SpeakerMapping speakerMapping;
-	/** ASR出力チャンネル数 */
+	/** ASR出力チャンネル数、 */
 	public int asrOutputChannels  = 0;
 	/** 乱数種に時間（System.DateTime.Now.Ticks）を使用するかどうか */
 	public bool useRandomSeedWithTime = true;
@@ -140,6 +140,10 @@ public class CriAtomConfig {
 	public bool keepPlayingSoundOnPause = true;
 	/** SonicSYNCを有効にするか否か（Android iOS Switch 以外） */
 	public bool enableSonicSync = true;
+	/** 音声出力されなくなるか否か（Linux以外） */
+	public bool enableAtomSoundDisabledMode = false;
+	/** 音声出力されなくなるか否か（Linux用） */
+	public bool enableAtomSoundDisabledModeLinux = false;
 
 	/** [Editor] ユーザーPCM出力モード関連パラメータ */
 	[System.Serializable]
@@ -163,6 +167,8 @@ public class CriAtomConfig {
 	public int  iosBufferingTime     = 50;
 	/** [iOS] iPodの再生を上書きするか？ */
 	public bool iosOverrideIPodMusic = false;
+	/** [iOS] OSのオーディオ中断通知に反応して音声システムのサスペンド・レジューム処理を行うかどうか */
+	public bool iosEnableOSNotificationHandling = true;
 
 	/** [Android] SonicSYNCモード有効化 */
 	public bool androidEnableSonicSync = true;
@@ -332,10 +338,12 @@ public class CriWareInitializer : CriMonoBehaviour {
 
 			/* CRI Atomライブラリの終了 */
 			if (initializesAtom) {
+#pragma warning disable CS0618 // CriAtomExLatencyEstimator is obsoleted.
 				/* EstimatorがStop状態になるまでFinalize */
 				while (CriAtomExLatencyEstimator.GetCurrentInfo().status != CriAtomExLatencyEstimator.Status.Stop) {
 					CriAtomExLatencyEstimator.FinalizeModule();
 				}
+#pragma warning restore CS0618
 
 				/* 終了処理の実行 */
 				CriAtomPlugin.FinalizeLibrary();
@@ -346,7 +354,6 @@ public class CriWareInitializer : CriMonoBehaviour {
 				CriFsPlugin.FinalizeLibrary();
 			}
 		}
-
 
 		/* CRI File Systemライブラリの初期化 */
 		if (initializesFileSystem) {
@@ -398,10 +405,12 @@ public class CriWareInitializer : CriMonoBehaviour {
 
 		/* CRI Atomライブラリの終了 */
 		if (initializesAtom) {
+#pragma warning disable CS0618 // CriAtomExLatencyEstimator is obsoleted.
 			/* EstimatorがStop状態になるまでFinalize */
 			while (CriAtomExLatencyEstimator.GetCurrentInfo().status != CriAtomExLatencyEstimator.Status.Stop) {
 				CriAtomExLatencyEstimator.FinalizeModule();
 			}
+#pragma warning restore CS0618 // CriAtomExLatencyEstimator is obsoleted.
 
 			/* 終了処理の実行 */
 			CriAtomPlugin.FinalizeLibrary();
@@ -493,6 +502,15 @@ public class CriWareInitializer : CriMonoBehaviour {
 	{
 		/* CRI Atomライブラリの初期化 */
 		if (CriAtomPlugin.IsLibraryInitialized() == false) {
+			/* Sound Disabled Mode プラットフォームチェック*/
+			bool enableAtomSoundDisabledModeResult = false;
+
+#if UNITY_EDITOR_LINUX || (!UNITY_EDITOR && UNITY_STANDALONE_LINUX)
+			enableAtomSoundDisabledModeResult = config.enableAtomSoundDisabledModeLinux;
+#else
+			enableAtomSoundDisabledModeResult = config.enableAtomSoundDisabledMode;
+#endif
+
 			/* 初期化処理の実行 */
 			CriAtomPlugin.SetConfigParameters(
 				(int)Math.Max(config.maxVirtualVoices, CriAtomPlugin.GetRequiredMaxVirtualVoices(config)),
@@ -518,7 +536,8 @@ public class CriWareInitializer : CriMonoBehaviour {
 				config.maxBuses,
 				config.maxPitch,
 				config.soundRendererType,
-				config.enableSonicSync);
+				config.enableSonicSync,
+				enableAtomSoundDisabledModeResult);
 
 			CriAtomPlugin.SetConfigMonitorParametes(
 				config.inGamePreviewConfig.maxPreviewObjects,
@@ -540,7 +559,8 @@ public class CriWareInitializer : CriMonoBehaviour {
 			CriAtomPlugin.SetConfigAdditionalParameters_IOS(
 				config.iosEnableSonicSync,
 				(uint)Math.Max(config.iosBufferingTime, 16),
-				config.iosOverrideIPodMusic
+				config.iosOverrideIPodMusic,
+				config.iosEnableOSNotificationHandling
 				);
 			/* Android 固有の初期化パラメータを登録 */
 			{
@@ -612,10 +632,6 @@ public class CriWareInitializer : CriMonoBehaviour {
 #if !(!UNITY_EDITOR && UNITY_WEBGL)
 			CriManaPlugin.UseStreamerManager(config.useStreamerManager);
 #endif
-			// set shader global keyword to inform cri mana shaders to output to correct colorspace
-			if (QualitySettings.activeColorSpace == ColorSpace.Linear) {
-				Shader.EnableKeyword("CRI_LINEAR_COLORSPACE");
-			}
 			return true;
 		} else {
 			return false;

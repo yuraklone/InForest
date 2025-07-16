@@ -157,7 +157,12 @@ namespace CriWare {
 		public static List<ReferencedObjects> FindMatchAllObjects(UnityEngine.Object suspect, Type searchType) {
 			foundReferences = new List<ReferencedObjects>();
 
-			var foundComponents = GameObject.FindObjectsOfType(searchType)
+			var foundComponents =
+#if UNITY_2023_1_OR_NEWER
+				GameObject.FindObjectsByType(searchType, FindObjectsSortMode.None)
+#else
+				GameObject.FindObjectsOfType(searchType)
+#endif
 				.Select(obj => (Component)obj)
 				.ToList();
 

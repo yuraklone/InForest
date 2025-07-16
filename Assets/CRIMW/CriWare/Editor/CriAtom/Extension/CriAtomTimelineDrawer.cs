@@ -210,7 +210,7 @@ namespace CriTimeline.Atom {
 					return;
 				}
 				this.atomClipWaveformInfo.lpcmBufferByInterleave = new Int16[this.atomClipWaveformInfo.waveformInfo.numSamples * this.atomClipWaveformInfo.waveformInfo.numChannels];
-				if (!LoadWaveform(acb.nativeHandle, criAtomClip.CueName, ref this.atomClipWaveformInfo.lpcmBufferByInterleave)) {
+				if (!CriAtomPlugin.GetWaveSamples(acb, criAtomClip.CueName, this.atomClipWaveformInfo.lpcmBufferByInterleave)) {
 					this.atomClipWaveformInfo.lpcmBufferByInterleave = null;
 					return;
 				}
@@ -284,22 +284,6 @@ namespace CriTimeline.Atom {
 				regionalCanvas.Draw(region.position);
 			}
 		}
-
-		private static bool LoadWaveform(IntPtr acbHn, string cueName, ref System.Int16[] decodeLpcmBuffer) {
-			var gcHandle = GCHandle.Alloc(decodeLpcmBuffer, GCHandleType.Pinned);
-			var result = criAtomUnityThumbnail_LoadWaveform(acbHn, cueName, gcHandle.AddrOfPinnedObject(), decodeLpcmBuffer.LongLength);
-			gcHandle.Free();
-			return result;
-		}
-
-		#region DLL Import
-#if !CRIWARE_ENABLE_HEADLESS_MODE
-		[DllImport(CriWare.Common.pluginName, CallingConvention = CriWare.Common.pluginCallingConvention)]
-		private static extern bool criAtomUnityThumbnail_LoadWaveform(IntPtr acbHn, string cue_name, IntPtr decode_lpcm_buffer, System.Int64 decodeLpcmBufferLength);
-#else
-		private static bool criAtomUnityThumbnail_LoadWaveform(IntPtr acbHn, string cue_name, IntPtr decode_lpcm_buffer, System.Int64 decodeLpcmBufferLength) {return false;}
-#endif
-		#endregion
 	}
 
 #endif //UNITY_2019_3_OR_NEWER
