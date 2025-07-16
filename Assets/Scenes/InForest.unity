@@ -4468,6 +4468,8 @@ MonoBehaviour:
     soundRendererType: 1
     keepPlayingSoundOnPause: 1
     enableSonicSync: 1
+    enableAtomSoundDisabledMode: 0
+    enableAtomSoundDisabledModeLinux: 0
     editorPcmOutputConfig:
       enable: 0
       bufferLength: 4096
@@ -4476,6 +4478,7 @@ MonoBehaviour:
     iosEnableSonicSync: 1
     iosBufferingTime: 50
     iosOverrideIPodMusic: 0
+    iosEnableOSNotificationHandling: 1
     androidEnableSonicSync: 1
     androidBufferingTime: 133
     androidStartBufferingTime: 100
@@ -6453,7 +6456,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1528331637439750655, guid: bb4db130607f0204dab9a72b175e20bb, type: 3}
       propertyPath: m_Name
-      value: PlayerA
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 3289708419839477626, guid: bb4db130607f0204dab9a72b175e20bb, type: 3}
       propertyPath: refCamera
