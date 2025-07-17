@@ -13,6 +13,7 @@ public class BGMStarter : MonoBehaviour
     {
         bgm = GameObject.FindGameObjectWithTag("BGM");
         bgmController = bgm.GetComponent<BGMController>();
+        bgmController.StopBgm();
 
         Invoke("BGMStart", startDelay);
 

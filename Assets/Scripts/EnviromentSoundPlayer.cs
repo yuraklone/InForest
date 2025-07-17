@@ -7,17 +7,28 @@ public class EnviromentSoundPlayer : MonoBehaviour
 {
     public CriAtomSource criAtomSource;
     public string playSound;
+    bool isPlaying;
 
     // Start is called before the first frame update
     void Start()
     {
-        criAtomSource.Play(playSound);
-        
+        isPlaying = false;
+        criAtomSource.Stop();
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if(this.gameObject.activeSelf == true && isPlaying == false)
+        {
+            criAtomSource.Play(playSound);
+            isPlaying = true;
+        }
+        else if(this.gameObject.activeSelf == false && isPlaying == true)
+        {
+            criAtomSource.Stop();
+            isPlaying = false;
+        }
     }
 }

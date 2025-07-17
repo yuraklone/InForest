@@ -20,6 +20,7 @@ public class AtomSourceManipulator : MonoBehaviour
 
     Vector3 minVector;
 
+    public float fromListenerY = 0.5f; 
 
     // Start is called before the first frame update
     void Start()
@@ -49,21 +50,21 @@ public class AtomSourceManipulator : MonoBehaviour
             {
                 minMagnitude = dist;
                 minVector = closestPoint;
-                minVector.y = 0;
             }
         }
 
-        // 最近傍点に CriAtomSource を移動。
-        //atomSource.transform.position = minVector;
-        
+        //最近傍点に CriAtomSource を移動。
+        //omSource.transform.position = minVector;
+        minVector.y = listener.transform.position.y + fromListenerY;
+
 
 
     }
     void LateUpdate()
     {
-        atomSource.transform.position = Vector3.Lerp(transform.position, minVector+new Vector3(0,1,0), followSpeed * Time.deltaTime);
+        atomSource.transform.position = Vector3.Lerp(transform.position, minVector, followSpeed * Time.deltaTime);
         atomSource.transform.rotation = Quaternion.Lerp(transform.rotation, listener.transform.rotation, followSpeed * Time.deltaTime);
-
+       
     }
 
 }
