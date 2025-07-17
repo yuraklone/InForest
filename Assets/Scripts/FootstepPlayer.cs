@@ -41,10 +41,10 @@ public class FootstepPlayer : MonoBehaviour
 
     public void PlayFootStepAudio()
     {
-        //RaycastHit hitInfo;
+
         Debug.Log("メソッド");
        
-        if (isGround) //Physics.Raycast(transform.position,Vector3.down,out hitInfo,2f,~(1<<6)))
+        if (isGround) 
         {
             Debug.Log(hitInfo.collider.tag);
             SwitchFootStepAudio(hitInfo);

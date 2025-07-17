@@ -4,7 +4,7 @@ using CriWare;
 using UnityEngine;
 
 
-// シーン中の GameObject にアタッチして利用します。
+// シーン中の GameObject にアタッチして利用
 // 設定された Collider リスト中で CriAtomListner に最も近い位置に
 // 指定の CriAtomSource を移動させます。
 public class AtomSourceManipulator : MonoBehaviour
@@ -36,7 +36,7 @@ public class AtomSourceManipulator : MonoBehaviour
             return;
         }
 
-        // 設定された Collider から CriAtomListener との最近傍点を計算。
+        // 設定された Collider から CriAtomListener との最近傍点を計算
         float minMagnitude = float.MaxValue;
         minVector = Vector3.zero;
         var listenerPosition = listener.transform.position;
@@ -53,7 +53,7 @@ public class AtomSourceManipulator : MonoBehaviour
             }
         }
 
-        //最近傍点に CriAtomSource を移動。
+        //最近傍点に CriAtomSource を移動
         //omSource.transform.position = minVector;
         minVector.y = listener.transform.position.y + fromListenerY;
 

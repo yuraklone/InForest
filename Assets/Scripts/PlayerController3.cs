@@ -56,8 +56,6 @@ public class PlayerController3 : MonoBehaviour
             animator.SetBool("move", true);
 
             // プレイヤーの回転(transform.rotation)の更新
-            // 無回転状態のプレイヤーのZ+方向(後頭部)を、
-            // カメラの水平回転(refCamera.hRotation)で回した移動の反対方向(-velocity)に回す回転に段々近づける
             transform.rotation = Quaternion.Slerp
                 (
                     transform.rotation,
