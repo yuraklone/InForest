@@ -1,4 +1,4 @@
-#In Forest
+# In Forest
 
 Unityの仕様、またUnityを用いたゲーム制作の理解、
 またサウンド職種志望としてUnityおよびCRI ADX2 LEを使用しての
@@ -9,7 +9,7 @@ Unityの仕様、またUnityを用いたゲーム制作の理解、
 作品となっています。
 
 
-##使用したツールなど
+## 使用したツールなど
 * Unity(ver.2022.3.62f1)
 * VisualStudio
 * CRI Atom Craft
